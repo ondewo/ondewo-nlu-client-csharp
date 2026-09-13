@@ -1,0 +1,55 @@
+#############################################################################################
+# pre-commit — language-agnostic hooks for this non-python repo (csharp client SDK).         #
+# C# formatting and analysis stay with the .NET toolchain (`dotnet format`, the analyzers    #
+# `make build_library` runs). Ruff/mypy/uv are python-only and NOT included here.            #
+# see https://pre-commit.com/#intro for an introduction to pre-commit                        #
+#############################################################################################
+
+# Never touch generated or vendored code: the stubs under api/, the generated project file and
+# both submodules. Everything in api/ is overwritten in full by the next `make build`, so a hook
+# that rewrote it would only produce a diff that cannot survive.
+exclude: '^(api|artifacts|nupkg|bin|obj)/|^ondewo-nlu-api/|^ondewo-proto-compiler/|^Ondewo\..*\.Client\.csproj$'
+
+fail_fast: false
+# "fail_fast: false" means pre-commit continues to run hooks after the first failure
+
+repos:
+
+  - repo: https://github.com/DavidAnson/markdownlint-cli2
+    rev: v0.23.0
+    hooks:
+      - id: markdownlint-cli2
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+        args: [ --maxkb=1024 ]
+      - id: check-json
+      - id: check-yaml
+      - id: check-xml          # validates the .csproj / nuget.config XML
+      - id: check-merge-conflict
+      - id: check-symlinks
+      - id: detect-private-key
+      - id: check-executables-have-shebangs
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+
+  # conventional-pre-commit MUST stay declared BEFORE giticket. Both run at the commit-msg stage
+  # and pre-commit runs them in declaration order. giticket rewrites the subject to
+  # "[OND221-2830] feat: …", which is no longer valid Conventional Commits, so with giticket
+  # first EVERY commit on a ticket branch fails this hook and can only land with --no-verify.
+  # Validate first, decorate second.
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v4.4.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [ commit-msg ]
+
+  - repo: https://github.com/milin/giticket
+    rev: '1.92'
+    hooks:
+      - id: giticket
+        args: [ '--regex=(?:(?:feature|bugfix|support|hotfix)/)?(OND[0-9]{3}-[0-9]{1,5})[_-][\w-]+',
+                '--format=[{ticket}] {commit_msg}',
+                '--mode=regex_match' ]

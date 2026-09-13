@@ -1,0 +1,71 @@
+name: ci
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# One run per branch/PR ref: a new push supersedes the in-flight run. Never on master, so every
+# commit on the release branch keeps its own result instead of being cancelled by the next push.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
+
+jobs:
+  lint:
+    name: pre-commit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # markdownlint-cli2 + the hygiene hooks. The commit-msg hooks (conventional-pre-commit,
+      # giticket) are not part of `pre-commit run --all-files` and are checked on commit instead.
+      - uses: pre-commit/action@v3.0.1
+
+  build:
+    name: dotnet build + test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      # Submodules ARE needed here, unlike in the node clients: the generated project file carries
+      # no literal versions, and the Makefile reads them back out of the pinned
+      # ondewo-proto-compiler/csharp/Dockerfile. Both submodules use https:// URLs, so a hosted
+      # runner can clone them without a deploy key.
+      - uses: actions/checkout@v5
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      # Prints the resolved pins first, so a failure further down is diagnosable from the log
+      # alone (an empty TargetFramework here means the submodule checkout is the real problem).
+      - name: Show the resolved build configuration
+        run: make TEST
+
+      # Fails when a .proto in the pinned API submodule produced no stub - i.e. when the
+      # committed api/ directory is stale with respect to the pinned API version.
+      - name: Check the generated stubs are complete and up to date
+        run: make check_build
+
+      - name: Build the generated library and run the test suite
+        run: make test
+
+      - name: Pack the NuGet package
+        run: make pack
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nupkg
+          path: nupkg/*.nupkg
+          if-no-files-found: error
