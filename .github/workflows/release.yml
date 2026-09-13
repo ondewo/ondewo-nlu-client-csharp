@@ -1,0 +1,110 @@
+name: release
+
+# Publishing half of the release. `make ondewo_release` cuts the branch, the tag and the GitHub
+# release from a developer machine; pushing that tag is what triggers this workflow, which rebuilds
+# the committed stubs from scratch and pushes the package to nuget.org. Nothing here is reachable
+# from an ordinary push - ci.yml runs the same packaging path credential-free on every commit.
+on:
+  push:
+    # GitHub filter-pattern syntax, not a regex: `+` means "one or more of the preceding
+    # character". Matches the bare `7.1.0` tags `make create_release_tag` writes, and the
+    # `7.1.0-rc.1` prerelease spelling; it deliberately does NOT match `release/7.1.0` branches.
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+      - '[0-9]+.[0-9]+.[0-9]+-*'
+
+# Read-only: this workflow uploads to nuget.org, never back into the repository. The GitHub release
+# itself is created by `make push_to_gh` with GITHUB_GH_TOKEN, not by GITHUB_TOKEN here.
+permissions:
+  contents: read
+
+# Never cancel a publish in flight, and never let two runs of the same tag race each other.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: pack + push to nuget.org
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      # FIRST, and before the checkout, so a release cut without the secret configured dies in
+      # seconds with an actionable message instead of building for ten minutes and then failing
+      # inside `dotnet nuget push` with an opaque 401 - or, worse, appearing to succeed while
+      # having uploaded nothing.
+      - name: Require the NUGET_API_KEY secret
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          set -eu
+          if [ -z "${NUGET_API_KEY:-}" ]; then
+            echo "::error title=NUGET_API_KEY is not configured::The repository secret NUGET_API_KEY is empty or missing, so ${GITHUB_REF_NAME} cannot be published. Create an API key at https://www.nuget.org/account/apikeys scoped to Push for the glob pattern 'Ondewo.*', then add it under Settings -> Secrets and variables -> Actions -> New repository secret with the name NUGET_API_KEY. Re-run this workflow afterwards."
+            exit 1
+          fi
+          echo "NUGET_API_KEY is configured."
+
+      # NO submodules - exactly like ci.yml. This job packs the stubs that are COMMITTED under
+      # api/; regenerating them is a docker-bound developer step that has already happened by the
+      # time the release tag exists.
+      - uses: actions/checkout@v4
+
+      # The tag is what a consumer sees on GitHub; ONDEWO_NLU_VERSION is what ends up in the
+      # <version> of the .nupkg. Publishing 7.1.0 off a tag called 7.1.1 is unrecoverable - the
+      # version can never be re-uploaded - so it is an error here rather than a surprise on
+      # nuget.org.
+      - name: Check the tag matches ONDEWO_NLU_VERSION
+        run: |
+          set -eu
+          version=$(sed -n 's|^ONDEWO_NLU_VERSION=||p' Makefile)
+          if [ -z "$version" ]; then
+            echo "::error title=Cannot read ONDEWO_NLU_VERSION::No 'ONDEWO_NLU_VERSION=' line in the Makefile."
+            exit 1
+          fi
+          if [ "$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error title=Tag/version mismatch::The tag is '${GITHUB_REF_NAME}' but the Makefile declares ONDEWO_NLU_VERSION=${version}. Delete the tag, fix one of the two, and cut the release again."
+            exit 1
+          fi
+          echo "Releasing ${version} from tag ${GITHUB_REF_NAME}."
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Check the committed stubs are present
+        run: |
+          set -eu
+          test -f Ondewo.NLU.Client.csproj
+          stubs=$(find api -type f -name '*.cs' | wc -l)
+          echo "committed csharp stub files: $stubs"
+          test "$stubs" -gt 0
+
+      - name: Verify the committed MSBuild pins
+        run: make check_dotnet_properties
+
+      # A release must not be able to ship something the ordinary CI gate would have rejected, so
+      # the same two gates run again here on the exact tree the tag points at.
+      - name: Test with the coverage gate
+        run: make test
+
+      - name: Dry-run the NuGet publish
+        run: make publish_dry_run
+
+      # The only step that needs the secret. `make push_to_nuget` is `@`-prefixed and hands the key
+      # to dotnet through the environment, so it never reaches the log; --skip-duplicate makes a
+      # re-run of an already-published version a no-op instead of a failure, which is what lets a
+      # release that died after the upload be resumed. Pushing the .nupkg uploads the .snupkg
+      # symbol package sitting beside it in nupkg/.
+      - name: Push to nuget.org
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: make push_to_nuget
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nupkg-${{ github.ref_name }}
+          path: |
+            nupkg/*.nupkg
+            nupkg/*.snupkg
+          if-no-files-found: error

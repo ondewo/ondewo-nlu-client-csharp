@@ -69,8 +69,12 @@ jobs:
       - name: Test with the coverage gate
         run: make test
 
-      - name: Pack the NuGet package
-        run: make pack
+      # The credential-free half of `make publish`: pack, assert the packed nuspec carries the
+      # metadata nuget.org expects, then resolve the .nupkg out of a local folder feed into a
+      # throwaway consumer project. No API key is involved and nothing is uploaded anywhere, so
+      # the publishing path is exercised on every push instead of first on a release tag.
+      - name: Dry-run the NuGet publish
+        run: make publish_dry_run
 
       - uses: actions/upload-artifact@v4
         if: always()
@@ -82,5 +86,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: nupkg
-          path: nupkg/*.nupkg
+          path: |
+            nupkg/*.nupkg
+            nupkg/*.snupkg
           if-no-files-found: error

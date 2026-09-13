@@ -37,17 +37,53 @@ over the `ondewo-nlu-api` submodule, and it is regenerated in full by `make buil
 
 ## Installation
 
-From [NuGet](https://www.nuget.org/):
+The package is published to [nuget.org](https://www.nuget.org/packages/Ondewo.NLU.Client) as
+**`Ondewo.NLU.Client`**. No custom feed, credential or `nuget.config` entry is needed — the default
+`nuget.org` source is enough.
+
+With the .NET CLI, from the directory of the project that should consume it:
 
 ```shell
 dotnet add package Ondewo.NLU.Client
 ```
 
-Or, with the `PackageReference` item directly in your `.csproj`:
+That resolves the latest stable version. To pin one — which is what you want in a service, because
+the client version tracks the ONDEWO NLU API in major and minor:
+
+```shell
+dotnet add package Ondewo.NLU.Client --version 7.1.0
+```
+
+Or write the `PackageReference` item into your `.csproj` directly:
 
 ```xml
-<PackageReference Include="Ondewo.NLU.Client" Version="1.0.0" />
+<ItemGroup>
+  <PackageReference Include="Ondewo.NLU.Client" Version="7.1.0" />
+</ItemGroup>
 ```
+
+In the Visual Studio Package Manager Console:
+
+```powershell
+Install-Package Ondewo.NLU.Client -Version 7.1.0
+```
+
+A few things worth knowing before you take the dependency:
+
+- **Target framework.** The package is built for `netstandard2.0`, so it is consumable from .NET
+  Framework 4.6.1+, .NET Core 2.0+ and every modern .NET. Note that gRPC over
+  `Grpc.Net.Client` needs HTTP/2, which in practice means .NET Core 3.0+ / .NET 5+; on .NET
+  Framework you additionally need `Grpc.Net.Client.Web` or the legacy `Grpc.Core` channel.
+- **Transitive dependencies.** `Google.Protobuf`, `Grpc.Net.Client`, `Grpc.Core.Api` and
+  `Google.Api.CommonProtos` come with it, at the versions pinned by the compiler image. The
+  `google/api`, `google/rpc` and `google/type` descriptors the ONDEWO API imports are taken from
+  `Google.Api.CommonProtos` rather than generated a second time into this assembly, so they never
+  collide with another Google library in your graph.
+- **Debugging.** Every release also publishes a `.snupkg` symbol package to the nuget.org symbol
+  server, so stepping into the generated stubs works once `https://symbols.nuget.org/download/symbols`
+  is enabled in your debugger's symbol settings.
+- **Versioning.** `Ondewo.NLU.Client` **7.1.x** is generated from ONDEWO NLU API **7.1.0**: major
+  and minor always match the API, the patch number is this client's own.
 
 From source:
 
@@ -147,9 +183,10 @@ Two details are worth knowing:
 ## Building and testing locally
 
 ```shell
-make build_library   ## dotnet build of the generated project, no docker
-make test            ## build_library + the xunit suite, gated on coverage
-make pack            ## dotnet pack into nupkg/
+make build_library     ## dotnet build of the generated project, no docker
+make test              ## build_library + the xunit suite, gated on coverage
+make pack              ## dotnet pack into nupkg/ (.nupkg + .snupkg)
+make publish_dry_run   ## pack + verify the package is publishable, no credential needed
 ```
 
 None of these needs docker, the submodules or the network beyond NuGet — they work on a plain clone, which is
@@ -190,15 +227,38 @@ Hand-written code is what the coverage gate measures, so anything added here nee
 
 ## Releasing
 
-Bump `ONDEWO_NLU_VERSION` in the `Makefile`, add a `RELEASE.md` entry in the existing format, then:
+Bump `ONDEWO_NLU_VERSION` in the `Makefile`, add a `RELEASE.md` entry in the existing format under a
+`## Release ONDEWO NLU Csharp Client <version>` heading — `build_gh_release` slices the release notes out by
+grepping for exactly that line — then:
 
 ```shell
 make ondewo_release
 ```
 
 That checks the release branch and tag do not exist yet (`spc`), pulls the credentials from the
-`ondewo-devops-accounts` repository, rebuilds everything, tags it, publishes the GitHub release and pushes the
+`ondewo-devops-accounts` repository, rebuilds everything, tags it, publishes the GitHub release and publishes the
 package to NuGet. `GITHUB_GH_TOKEN` and `NUGET_API_KEY` are read at runtime only and must never be committed.
+
+### The NuGet half
+
+| Target              | What it does                                                                       |
+| ------------------- | ---------------------------------------------------------------------------------- |
+| `pack`              | `dotnet pack` into `nupkg/` — the `.nupkg` and the `.snupkg` symbol package          |
+| `verify_nupkg_metadata` | reads the nuspec back out of the packed `.nupkg` and fails on missing metadata  |
+| `verify_nupkg_installs` | restores the packed `.nupkg` from a local folder feed into a throwaway consumer  |
+| `publish_dry_run`   | the three above — **needs no credential**, and is what `ci.yml` runs on every push   |
+| `push_to_nuget`     | `dotnet nuget push` to `NUGET_SOURCE` — the only step that needs `NUGET_API_KEY`     |
+| `publish`           | `publish_dry_run` then `push_to_nuget`; this is what `release` calls                 |
+
+`NUGET_API_KEY` comes from `ondewo-devops-accounts/account_nuget.env` (read by `run_release_with_devops`) and
+must be an API key scoped to **Push** for the glob pattern `Ondewo.*`. The recipe that carries it is
+`@`-prefixed and hands the key to `dotnet` through the environment, so it never reaches a build log. Pushing the
+`.nupkg` uploads the `.snupkg` beside it automatically.
+
+Pushing a version tag (`7.1.0`, `7.1.0-rc.1` — the shape `make create_release_tag` writes) also triggers
+`.github/workflows/release.yml`, which rebuilds the committed stubs, re-runs the test and dry-run gates and
+publishes with the `NUGET_API_KEY` **repository secret**. Without that secret the run stops on its very first
+step with an explicit error rather than quietly publishing nothing.
 
 ## Contributing
 

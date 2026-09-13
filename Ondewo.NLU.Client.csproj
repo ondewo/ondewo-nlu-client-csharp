@@ -32,7 +32,16 @@
          property unconditionally makes `dotnet pack` fail with NU5039 ("the readme file
          'README.md' does not exist in the package") whenever no readme was copied in. -->
     <PackageReadmeFile Condition="Exists('README.md')">README.md</PackageReadmeFile>
-    <RepositoryUrl>https://github.com/ondewo/ondewo-proto-compiler</RepositoryUrl>
+    <!-- `repository` and `projectUrl` name THIS client repository, not the generator: they are
+         what nuget.org turns into the "Project website" / "Source repository" links, and a
+         consumer following them has to land where this package's sources and issues live. The
+         generator is credited in the README instead. RepositoryType is spelled out rather than
+         left to the SDK default so the nuspec cannot lose it. -->
+    <PackageProjectUrl>https://github.com/ondewo/ondewo-nlu-client-csharp</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/ondewo/ondewo-nlu-client-csharp</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>ondewo;nlu;grpc;protobuf;client;api</PackageTags>
+    <Copyright>Copyright ONDEWO GmbH</Copyright>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>

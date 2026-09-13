@@ -21,9 +21,10 @@ artifacts/
 [Rr]elease/
 TestResults/
 
-# NuGet - packed output and the local package cache
+# NuGet - packed output, the local package cache and the publish_dry_run scratch tree
 nupkg/
 packages/
+.nuget-dry-run/
 *.nupkg
 *.snupkg
 .nuget/

@@ -50,8 +50,10 @@ ONDEWO_PROTO_COMPILER_GIT_BRANCH=tags/5.15.0
 
 # You need to set up an access token at https://github.com/settings/tokens - permissions are important
 GITHUB_GH_TOKEN?=ENTER_YOUR_TOKEN_HERE
-# You need to set up an API key at https://www.nuget.org/account/apikeys
-NUGET_API_KEY?=ENTER_YOUR_NUGET_API_KEY_HERE
+# You need to set up an API key at https://www.nuget.org/account/apikeys, scoped to
+# "Push" for the glob pattern Ondewo.*. Released from ondewo-devops-accounts/account_nuget.env
+# (see run_release_with_devops) and from the NUGET_API_KEY GitHub secret in release.yml.
+NUGET_API_KEY?=ENTER_HERE_YOUR_NUGET_API_KEY
 NUGET_SOURCE?=https://api.nuget.org/v3/index.json
 
 # Terminate the release-notes slice on the ***** separator that delimits release entries, NOT on
@@ -89,6 +91,14 @@ PROTO_COMPILER_DOCKERFILE:=${ONDEWO_PROTO_COMPILER_DIR}/csharp/Dockerfile
 # one of them to MSBuild, which reads environment variables as properties.
 OndewoPackageId=Ondewo.NLU.Client
 OndewoPackageVersion=${ONDEWO_NLU_VERSION}
+# The two artefacts `dotnet pack` produces, named by NuGet's fixed <id>.<version>.<ext> convention.
+# The .snupkg is the symbol package: `dotnet nuget push` uploads it automatically when it sits next
+# to the .nupkg it belongs to, which is why both live in the same directory.
+NUPKG_DIR=nupkg
+NUPKG=${NUPKG_DIR}/${OndewoPackageId}.${ONDEWO_NLU_VERSION}.nupkg
+SNUPKG=${NUPKG_DIR}/${OndewoPackageId}.${ONDEWO_NLU_VERSION}.snupkg
+# Scratch tree for publish_dry_run: the extracted nuspec and an isolated consumer restore.
+DRY_RUN_DIR=.nuget-dry-run
 # Keeps the .proto submodule out of the SDK's default Compile glob on a host build.
 OndewoProtosDir=${ONDEWO_API_DIR}
 # In a plain clone - CI included - the submodule is not checked out and every $(shell sed ...)
@@ -142,8 +152,9 @@ TEST: ## Diagnostics - print the resolved build configuration and the current re
 	@echo "Google.Protobuf:      ${GoogleProtobufVersion}"
 	@echo "Grpc.Net.Client:      ${GrpcDotnetVersion}"
 	@echo "Google.Api.CommonProtos: ${GoogleApiCommonProtosVersion}"
+	@echo "NuGet source:         ${NUGET_SOURCE}"
 	@echo "GITHUB_GH_TOKEN set:  $(if $(filter-out ENTER_YOUR_TOKEN_HERE,$(GITHUB_GH_TOKEN)),yes,no)"
-	@echo "NUGET_API_KEY set:    $(if $(filter-out ENTER_YOUR_NUGET_API_KEY_HERE,$(NUGET_API_KEY)),yes,no)"
+	@echo "NUGET_API_KEY set:    $(if $(filter-out ENTER_HERE_YOUR_NUGET_API_KEY,$(NUGET_API_KEY)),yes,no)"
 	@printf '\n%s\n' "${CURRENT_RELEASE_NOTES}"
 
 ########################################################
@@ -283,11 +294,16 @@ test: build_library ## Run the csharp test suite over the committed stubs, gated
 		/p:ThresholdStat=total
 	@echo "$(GREEN)[SUCCESS]$(NC) test suite passed with >= ${COVERAGE_THRESHOLD}% coverage of the hand-written sources"
 
-pack: build_library ## Pack the NuGet package on the host into nupkg/
-	dotnet pack ${OndewoPackageId}.csproj -c Release --no-build -o nupkg
+# -warnaserror promotes the NU5xxx packaging warnings to errors, which is what turns "nuget.org
+# warns about a missing licence/readme" into a failed build here instead of a published package
+# nobody wants. It is safe to be this strict only because --no-build implies --no-restore: the
+# restore-time NuGet audit advisories (NU19xx), which appear when a CVE is published for a
+# dependency and have nothing to do with packaging, cannot reach this step.
+pack: build_library ## Pack the NuGet package (.nupkg + .snupkg) on the host into nupkg/
+	dotnet pack ${OndewoPackageId}.csproj -c Release --no-build -o ${NUPKG_DIR} -warnaserror
 
 clean: ## Remove the generated stubs, the build output and the packed packages
-	rm -rf api artifacts nupkg bin obj coverage build_check.txt
+	rm -rf api artifacts ${NUPKG_DIR} bin obj coverage build_check.txt ${DRY_RUN_DIR}
 
 ########################################################
 #		Submodules
@@ -330,7 +346,7 @@ release: ## Automate the entire release process
 	make create_release_branch
 	make create_release_tag
 	make push_to_gh
-	make push_to_nuget
+	make publish
 	@echo "$(GREEN)[SUCCESS]$(NC) Release finished"
 
 create_release_branch: ## Create Release Branch and push it to origin
@@ -357,19 +373,126 @@ push_to_gh: login_to_gh build_gh_release ## Logs into GitHub CLI and releases
 ########################################################
 #		NUGET
 
-# `@`-prefixed so the API key never reaches the build log.
-push_to_nuget: ## Publish the packed NuGet package to nuget.org
-	@if [ -z "${NUGET_API_KEY}" ] || [ "${NUGET_API_KEY}" = "ENTER_YOUR_NUGET_API_KEY_HERE" ]; then \
-		echo "$(RED)[ERROR]$(NC) NUGET_API_KEY is not set - create one at https://www.nuget.org/account/apikeys"; \
-		exit 1; \
-	fi
-	@test -f "nupkg/${OndewoPackageId}.${ONDEWO_NLU_VERSION}.nupkg" || { \
-		echo "$(RED)[ERROR]$(NC) nupkg/${OndewoPackageId}.${ONDEWO_NLU_VERSION}.nupkg is missing - run 'make build' first"; \
+publish: publish_dry_run push_to_nuget ## Verify the packed package, then publish it to nuget.org
+	@echo "$(GREEN)[SUCCESS]$(NC) ${OndewoPackageId} ${ONDEWO_NLU_VERSION} published to ${NUGET_SOURCE}"
+
+# The credential-free half of `publish`, and the only half CI ever runs. It exercises the whole
+# packaging path - pack, metadata, installability - so a package that nuget.org would reject, or
+# that nobody could consume, fails on an ordinary push instead of in the middle of a release.
+publish_dry_run: pack verify_nupkg_metadata verify_nupkg_installs ## Exercise the full packaging path without any credential
+	@echo "$(GREEN)[SUCCESS]$(NC) ${NUPKG} is ready to publish - run 'make publish' with NUGET_API_KEY set"
+
+# Asserts on the PACKED artefact rather than on the .csproj: a property can be silently dropped on
+# the way into the nuspec (PackageReadmeFile behind a false Exists() condition is exactly that), and
+# the nuspec is what nuget.org reads. Every element below is one nuget.org warns about - or, for
+# licence and description, rejects the upload over - when it is missing.
+verify_nupkg_metadata: ## Assert the packed .nupkg/.snupkg carry the metadata nuget.org expects
+	@test -f "${NUPKG}" || { \
+		echo "$(RED)[ERROR]$(NC) ${NUPKG} is missing - run 'make pack' first"; \
 		exit 1; \
 	}
-	@echo "$(BLUE)[INFO]$(NC) Pushing ${OndewoPackageId} ${ONDEWO_NLU_VERSION} to ${NUGET_SOURCE} ..."
-	@dotnet nuget push "nupkg/${OndewoPackageId}.${ONDEWO_NLU_VERSION}.nupkg" \
-		--api-key ${NUGET_API_KEY} \
+	@test -f "${SNUPKG}" || { \
+		echo "$(RED)[ERROR]$(NC) ${SNUPKG} is missing - IncludeSymbols and SymbolPackageFormat=snupkg"; \
+		echo "        must stay set in ${OndewoPackageId}.csproj"; \
+		exit 1; \
+	}
+	@mkdir -p ${DRY_RUN_DIR}
+	@unzip -p "${NUPKG}" "${OndewoPackageId}.nuspec" > ${DRY_RUN_DIR}/packed.nuspec
+	@unzip -l "${NUPKG}"  > ${DRY_RUN_DIR}/nupkg.list
+	@unzip -l "${SNUPKG}" > ${DRY_RUN_DIR}/snupkg.list
+	@echo "$(BLUE)[INFO]$(NC) Checking the nuspec of ${NUPKG} ..."
+	@rc=0 ; \
+	require() { \
+		if grep -Eq "$$2" "$$3" ; then \
+			echo "  $(GREEN)ok$(NC)      $$1" ; \
+		else \
+			echo "  $(RED)MISSING$(NC) $$1 - no match for /$$2/ in $$3" ; \
+			rc=1 ; \
+		fi ; \
+	} ; \
+	nuspec=${DRY_RUN_DIR}/packed.nuspec ; \
+	require "PackageId"              "<id>${OndewoPackageId}</id>"                    "$$nuspec" ; \
+	require "Version"                "<version>${ONDEWO_NLU_VERSION}</version>"       "$$nuspec" ; \
+	require "Authors"                "<authors>.+</authors>"                          "$$nuspec" ; \
+	require "Description"            "<description>.+</description>"                  "$$nuspec" ; \
+	require "PackageLicenseExpression" "<license type=\"expression\">.+</license>"     "$$nuspec" ; \
+	require "PackageProjectUrl"      "<projectUrl>https?://.+</projectUrl>"            "$$nuspec" ; \
+	require "RepositoryType"         "<repository[^>]+type=\"git\""                    "$$nuspec" ; \
+	require "RepositoryUrl"          "<repository[^>]+url=\"https?://.+\""             "$$nuspec" ; \
+	require "PackageReadmeFile"      "<readme>README.md</readme>"                      "$$nuspec" ; \
+	require "readme in the package"  "[[:space:]]README.md$$"                          "${DRY_RUN_DIR}/nupkg.list" ; \
+	require "assembly in the package" "lib/.+/${OndewoPackageId}.dll$$"                "${DRY_RUN_DIR}/nupkg.list" ; \
+	require "portable pdb in the symbols" "lib/.+/${OndewoPackageId}.pdb$$"            "${DRY_RUN_DIR}/snupkg.list" ; \
+	if [ $$rc -ne 0 ]; then \
+		echo "$(RED)[ERROR]$(NC) ${NUPKG} is missing metadata nuget.org expects - fix ${OndewoPackageId}.csproj" ; \
+		exit 1 ; \
+	fi ; \
+	echo "$(GREEN)[SUCCESS]$(NC) ${NUPKG} and ${SNUPKG} carry the expected metadata"
+
+# The strongest proof available without an API key: resolve the freshly packed .nupkg out of a local
+# folder feed into a throwaway consumer project. A malformed nuspec, a wrong id or version, a target
+# framework no consumer can use (NU1202) or a dependency that does not exist all fail here - on
+# nuget.org the same defects are a rejected upload or a package nobody can install.
+#   * --packages points the restore at an EMPTY private packages folder, so the resolution cannot be
+#     satisfied from a previous run left in ~/.nuget/packages and pass without touching the feed.
+#   * restore only, never build: a build would emit obj/**/*AssemblyInfo.cs under the repository
+#     root, where the library project's default Compile glob would pick it up (CS0579).
+verify_nupkg_installs: ## Restore the packed package into a throwaway consumer project
+	@test -f "${NUPKG}" || { \
+		echo "$(RED)[ERROR]$(NC) ${NUPKG} is missing - run 'make pack' first"; \
+		exit 1; \
+	}
+	@rm -rf ${DRY_RUN_DIR}/consumer ${DRY_RUN_DIR}/packages
+	@mkdir -p ${DRY_RUN_DIR}/consumer
+	@printf '%s\n' \
+		'<?xml version="1.0" encoding="utf-8"?>' \
+		'<configuration>' \
+		'  <packageSources>' \
+		'    <clear />' \
+		'    <add key="dry-run-local" value="${CURDIR}/${NUPKG_DIR}" />' \
+		'    <add key="nuget.org" value="${NUGET_SOURCE}" />' \
+		'  </packageSources>' \
+		'</configuration>' > ${DRY_RUN_DIR}/consumer/nuget.config
+	@printf '%s\n' \
+		'<Project Sdk="Microsoft.NET.Sdk">' \
+		'  <PropertyGroup>' \
+		'    <TargetFramework>netstandard2.0</TargetFramework>' \
+		'  </PropertyGroup>' \
+		'  <ItemGroup>' \
+		'    <PackageReference Include="${OndewoPackageId}" Version="${ONDEWO_NLU_VERSION}" />' \
+		'  </ItemGroup>' \
+		'</Project>' > ${DRY_RUN_DIR}/consumer/consumer.csproj
+	@echo "$(BLUE)[INFO]$(NC) Restoring ${OndewoPackageId} ${ONDEWO_NLU_VERSION} from ${CURDIR}/${NUPKG_DIR} into a throwaway consumer ..."
+	dotnet restore ${DRY_RUN_DIR}/consumer/consumer.csproj \
+		--configfile ${CURDIR}/${DRY_RUN_DIR}/consumer/nuget.config \
+		--packages ${CURDIR}/${DRY_RUN_DIR}/packages
+	@test -d "${DRY_RUN_DIR}/packages/$$(echo ${OndewoPackageId} | tr 'A-Z' 'a-z')/${ONDEWO_NLU_VERSION}" || { \
+		echo "$(RED)[ERROR]$(NC) the restore succeeded but did not install ${OndewoPackageId} ${ONDEWO_NLU_VERSION}"; \
+		exit 1; \
+	}
+	@echo "$(GREEN)[SUCCESS]$(NC) a consumer can install ${OndewoPackageId} ${ONDEWO_NLU_VERSION} and its dependency graph"
+
+# `@`-prefixed so the API key never reaches the build log, and handed to dotnet through the
+# environment (the `export` at the top of this file exports every variable here) so it is not
+# spelled out in the recipe at all. Pushing the .nupkg also uploads the .snupkg sitting beside it.
+push_to_nuget: ## Publish the packed NuGet package to nuget.org
+	@if [ -z "${NUGET_API_KEY}" ] || [ "${NUGET_API_KEY}" = "ENTER_HERE_YOUR_NUGET_API_KEY" ]; then \
+		echo "$(RED)[ERROR]$(NC) NUGET_API_KEY is not set - create one at https://www.nuget.org/account/apikeys"; \
+		echo "        and add it to ondewo-devops-accounts/account_nuget.env, or pass it on the"; \
+		echo "        command line: make push_to_nuget NUGET_API_KEY=..."; \
+		exit 1; \
+	fi
+	@test -f "${NUPKG}" || { \
+		echo "$(RED)[ERROR]$(NC) ${NUPKG} is missing - run 'make build' or 'make pack' first"; \
+		exit 1; \
+	}
+	@test -f "${SNUPKG}" || { \
+		echo "$(RED)[ERROR]$(NC) ${SNUPKG} is missing - it is published together with ${NUPKG}"; \
+		exit 1; \
+	}
+	@echo "$(BLUE)[INFO]$(NC) Pushing ${OndewoPackageId} ${ONDEWO_NLU_VERSION} (+ symbols) to ${NUGET_SOURCE} ..."
+	@dotnet nuget push "${NUPKG}" \
+		--api-key "$$NUGET_API_KEY" \
 		--source ${NUGET_SOURCE} \
 		--skip-duplicate
 	@echo "$(GREEN)[SUCCESS]$(NC) Released to NuGet"
