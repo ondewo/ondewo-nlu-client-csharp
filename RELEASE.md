@@ -2,7 +2,7 @@
 
 *****************
 
-## Release ONDEWO NLU Csharp Client 1.0.0
+## Release ONDEWO NLU Csharp Client 7.1.0
 
 ### New Features
 
