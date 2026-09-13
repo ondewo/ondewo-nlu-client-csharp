@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
@@ -36,33 +36,48 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      # Submodules ARE needed here, unlike in the node clients: the generated project file carries
-      # no literal versions, and the Makefile reads them back out of the pinned
-      # ondewo-proto-compiler/csharp/Dockerfile. Both submodules use https:// URLs, so a hosted
-      # runner can clone them without a deploy key.
-      - uses: actions/checkout@v5
-        with:
-          submodules: recursive
+      # NO submodules. This job builds and tests the stubs that are COMMITTED under api/; it never
+      # builds the compiler image and never runs protoc - regenerating the stubs is a separate,
+      # slow, docker-bound concern driven by `make build` on a developer machine.
+      # The pins the generated project file reads live in the compiler submodule's Dockerfile and
+      # are mirrored into Directory.Build.props, which is what makes a submodule-free build work;
+      # `make check_dotnet_properties` is what keeps the two from drifting.
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-dotnet@v5
+      - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
 
-      # Prints the resolved pins first, so a failure further down is diagnosable from the log
-      # alone (an empty TargetFramework here means the submodule checkout is the real problem).
-      - name: Show the resolved build configuration
-        run: make TEST
+      # Fails the build when the committed stubs are missing or empty, so none of the steps below
+      # can pass by having nothing to do.
+      - name: Check the committed stubs are present
+        run: |
+          set -eu
+          test -f Ondewo.NLU.Client.csproj
+          stubs=$(find api -type f -name '*.cs' | wc -l)
+          echo "committed csharp stub files: $stubs"
+          test "$stubs" -gt 0
 
-      # Fails when a .proto in the pinned API submodule produced no stub - i.e. when the
-      # committed api/ directory is stale with respect to the pinned API version.
-      - name: Check the generated stubs are complete and up to date
-        run: make check_build
+      - name: Verify the committed MSBuild pins
+        run: make check_dotnet_properties
 
-      - name: Build the generated library and run the test suite
+      - name: Build the generated library
+        run: make build_library
+
+      # Runs the xunit suite over the committed stubs and fails when coverage of the hand-written
+      # sources (everything outside api/) drops below COVERAGE_THRESHOLD.
+      - name: Test with the coverage gate
         run: make test
 
       - name: Pack the NuGet package
         run: make pack
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage
+          path: coverage/
+          if-no-files-found: error
 
       - uses: actions/upload-artifact@v4
         with:

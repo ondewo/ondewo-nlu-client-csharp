@@ -95,6 +95,11 @@ OndewoPackageId=Ondewo.NLU.Client
 OndewoPackageVersion=${ONDEWO_NLU_VERSION}
 # Keeps the .proto submodule out of the SDK's default Compile glob on a host build.
 OndewoProtosDir=${ONDEWO_API_DIR}
+# In a plain clone - CI included - the submodule is not checked out and every $(shell sed ...)
+# below yields the empty string. Directory.Build.props then supplies a committed fallback for each
+# of them (it declares them only when they are still empty, so an exported value here always
+# wins), and `make check_dotnet_properties` fails the build when the two ever disagree.
+DOTNET_PROPS_FILE=Directory.Build.props
 OndewoTargetFramework:=$(shell sed -n 's|^ARG DOTNET_TARGET_FRAMEWORK=||p' ${PROTO_COMPILER_DOCKERFILE} 2>/dev/null)
 GoogleProtobufVersion:=$(shell sed -n 's|^ARG GOOGLE_PROTOBUF_VERSION=||p' ${PROTO_COMPILER_DOCKERFILE} 2>/dev/null)
 GrpcDotnetVersion:=$(shell sed -n 's|^ARG GRPC_DOTNET_VERSION=||p' ${PROTO_COMPILER_DOCKERFILE} 2>/dev/null)
@@ -217,15 +222,34 @@ check_build: ## Checks that a csharp stub was generated for every compiled proto
 	if [ $$rc -ne 0 ]; then exit 1 ; fi ; \
 	echo "$(GREEN)[SUCCESS]$(NC) every proto under ${ONDEWO_PROTOS_DIR} has a generated stub"
 
-check_dotnet_properties: ## Fail early when the MSBuild pins cannot be read from the pinned compiler submodule
-	@if [ -z "${OndewoTargetFramework}" ] || [ -z "${GoogleProtobufVersion}" ] || \
-	    [ -z "${GrpcDotnetVersion}" ] || [ -z "${GoogleApiCommonProtosVersion}" ]; then \
-		echo "$(RED)[ERROR]$(NC) could not read the MSBuild pins from ${PROTO_COMPILER_DOCKERFILE}." ; \
-		echo "        The generated project file has no literal versions - it reads them as MSBuild" ; \
-		echo "        properties. Run 'make update_submodules' so they can be read from the pinned" ; \
-		echo "        ondewo-proto-compiler submodule." ; \
-		exit 1 ; \
-	fi
+# The generated project file has no literal versions - it reads them as MSBuild properties. They
+# are pinned in ONE place, the compiler's Dockerfile ARG lines, and mirrored into
+# ${DOTNET_PROPS_FILE} so that a checkout without submodules still builds. Drift between the two
+# would silently compile the committed stubs against a different package graph than the image that
+# generated them, so it is an error here rather than a surprise at run time.
+check_dotnet_properties: ## Verify the committed MSBuild pins match the pinned compiler Dockerfile
+	@if [ ! -f ${PROTO_COMPILER_DOCKERFILE} ]; then \
+		echo "$(YELLOW)[WARN]$(NC) ${PROTO_COMPILER_DOCKERFILE} is not checked out - building with the" ; \
+		echo "       fallback pins in ${DOTNET_PROPS_FILE}. Run 'make update_submodules' to verify them." ; \
+		exit 0 ; \
+	fi ; \
+	rc=0 ; \
+	for pair in "OndewoTargetFramework=DOTNET_TARGET_FRAMEWORK" \
+	            "GoogleProtobufVersion=GOOGLE_PROTOBUF_VERSION" \
+	            "GrpcDotnetVersion=GRPC_DOTNET_VERSION" \
+	            "GoogleApiCommonProtosVersion=GOOGLE_API_COMMONPROTOS_VERSION" ; do \
+		property=$${pair%%=*} ; \
+		argument=$${pair##*=} ; \
+		pinned=$$(sed -n "s|^ARG $$argument=||p" ${PROTO_COMPILER_DOCKERFILE}) ; \
+		committed=$$(sed -n "s|.*<$$property[^>]*>\(.*\)</$$property>.*|\1|p" ${DOTNET_PROPS_FILE}) ; \
+		if [ -z "$$pinned" ] || [ "$$pinned" != "$$committed" ]; then \
+			echo "$(RED)[ERROR]$(NC) $$property is '$$committed' in ${DOTNET_PROPS_FILE} but" ; \
+			echo "        ARG $$argument='$$pinned' in ${PROTO_COMPILER_DOCKERFILE} - update the former" ; \
+			rc=1 ; \
+		fi ; \
+	done ; \
+	if [ $$rc -ne 0 ]; then exit 1 ; fi ; \
+	echo "$(GREEN)[SUCCESS]$(NC) the committed MSBuild pins match ${PROTO_COMPILER_DOCKERFILE}"
 
 build_library: check_dotnet_properties ## Compile the generated library on the host (no docker)
 	@test -f ${OndewoPackageId}.csproj || { \
@@ -234,23 +258,40 @@ build_library: check_dotnet_properties ## Compile the generated library on the h
 	}
 	dotnet build ${OndewoPackageId}.csproj -c Release
 
-test: build_library ## Compile the generated library and run the csharp test suite
-	@projects=$$(find tests -type f -name '*.csproj' 2>/dev/null) ; \
-	if [ -z "$$projects" ]; then \
-		echo "$(YELLOW)[NOOP]$(NC) no test project under tests/ - only the generated library was compiled" ; \
-	else \
-		for project in $$projects ; do \
-			echo "$(BLUE)[INFO]$(NC) dotnet test $$project" ; \
-			dotnet test "$$project" -c Release || exit 1 ; \
-		done ; \
-		echo "$(GREEN)[SUCCESS]$(NC) test suite passed" ; \
-	fi
+# Coverage is measured over the HAND-WRITTEN sources only: everything under api/ is machine
+# output, and a coverage number over generated code measures the generator, not this repository.
+# The stubs are still EXERCISED by the suite - it round-trips every generated message through the
+# wire format and binds every generated service client to a channel - they are just not counted.
+# `Include` narrows instrumentation to the client assembly (the test assembly itself and the
+# Google.Protobuf / Grpc.* dependencies are none of our business) and `ExcludeByFile` then drops
+# the generated half of it, which leaves exactly auth/.
+# The commas in the coverlet switches are written `%2c`: MSBuild splits a /p: value on a literal
+# comma and aborts with "MSB1006: Property is not valid. Switch: lcov".
+COVERAGE_THRESHOLD?=100
+TEST_PROJECT=tests/Ondewo.NLU.Client.Tests/Ondewo.NLU.Client.Tests.csproj
+
+test: build_library ## Run the csharp test suite over the committed stubs, gated on hand-written coverage
+	@test -f ${TEST_PROJECT} || { \
+		echo "$(RED)[ERROR]$(NC) ${TEST_PROJECT} is missing - this repository must ship a test project"; \
+		exit 1; \
+	}
+	@echo "$(BLUE)[INFO]$(NC) dotnet test ${TEST_PROJECT} (coverage gate: ${COVERAGE_THRESHOLD}% of the hand-written sources)"
+	dotnet test ${TEST_PROJECT} -c Release \
+		/p:CollectCoverage=true \
+		/p:Include="[${OndewoPackageId}]*" \
+		/p:ExcludeByFile="**/api/**/*.cs" \
+		/p:CoverletOutput=${CURDIR}/coverage/ \
+		/p:CoverletOutputFormat=cobertura%2clcov \
+		/p:Threshold=${COVERAGE_THRESHOLD} \
+		/p:ThresholdType=line%2cbranch%2cmethod \
+		/p:ThresholdStat=total
+	@echo "$(GREEN)[SUCCESS]$(NC) test suite passed with >= ${COVERAGE_THRESHOLD}% coverage of the hand-written sources"
 
 pack: build_library ## Pack the NuGet package on the host into nupkg/
 	dotnet pack ${OndewoPackageId}.csproj -c Release --no-build -o nupkg
 
 clean: ## Remove the generated stubs, the build output and the packed packages
-	rm -rf api artifacts nupkg bin obj build_check.txt
+	rm -rf api artifacts nupkg bin obj coverage build_check.txt
 
 ########################################################
 #		Submodules

@@ -1,0 +1,26 @@
+<Project>
+
+  <!-- Fallback values for the MSBuild properties the generated project file reads.
+
+       Ondewo.NLU.Client.csproj deliberately carries no literal version - it reads
+       $(OndewoTargetFramework), $(GoogleProtobufVersion), $(GrpcDotnetVersion) and
+       $(GoogleApiCommonProtosVersion). Inside the compiler image those come from its Dockerfile
+       ARG lines; the Makefile reads them back out of that same pinned Dockerfile and exports
+       them, so a host build cannot drift from the image that generated api/.
+
+       Neither source exists in a plain clone: the pins live in the ondewo-proto-compiler
+       submodule, and CI builds the COMMITTED stubs without checking any submodule out. Every
+       property below is therefore declared only when it is still empty - an exported value from
+       the Makefile always wins - and `make check_dotnet_properties` fails the build when these
+       fallbacks and the pinned Dockerfile disagree, which is the only way they can drift.
+
+       When the compiler bumps a pin, update it here too; check_dotnet_properties tells you so. -->
+  <PropertyGroup>
+    <OndewoPackageId Condition="'$(OndewoPackageId)' == ''">Ondewo.NLU.Client</OndewoPackageId>
+    <OndewoTargetFramework Condition="'$(OndewoTargetFramework)' == ''">netstandard2.0</OndewoTargetFramework>
+    <GoogleProtobufVersion Condition="'$(GoogleProtobufVersion)' == ''">3.32.0</GoogleProtobufVersion>
+    <GrpcDotnetVersion Condition="'$(GrpcDotnetVersion)' == ''">2.83.0</GrpcDotnetVersion>
+    <GoogleApiCommonProtosVersion Condition="'$(GoogleApiCommonProtosVersion)' == ''">2.17.0</GoogleApiCommonProtosVersion>
+  </PropertyGroup>
+
+</Project>

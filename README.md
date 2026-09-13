@@ -101,11 +101,15 @@ var response = await client.SomeRpcAsync(new SomeRequest());
 ├── api                                      <----- generated stubs, nested by C# namespace
 │   └── Ondewo
 │       └── ...
+├── auth                                     <----- the only hand-written sources in the package
+├── tests                                    <----- xunit suite over the committed stubs
 ├── artifacts                                <----- compiled assembly, symbols, XML docs (not tracked)
+├── coverage                                 <----- cobertura/lcov written by `make test` (not tracked)
 ├── nupkg                                    <----- the packed .nupkg / .snupkg (not tracked)
 ├── ondewo-nlu-api                               <----- submodule: the .proto sources
 ├── ondewo-proto-compiler                    <----- submodule: the code generator
 ├── Ondewo.NLU.Client.csproj     <----- generated project file (tracked)
+├── Directory.Build.props                    <----- fallback MSBuild pins for a submodule-free build
 ├── Makefile                                 <----- every documented entry point, see `make help`
 ├── README.md
 └── RELEASE.md
@@ -144,31 +148,45 @@ Two details are worth knowing:
 
 ```shell
 make build_library   ## dotnet build of the generated project, no docker
-make test            ## build_library + dotnet test over every tests/**/*.csproj
+make test            ## build_library + the xunit suite, gated on coverage
 make pack            ## dotnet pack into nupkg/
 ```
+
+None of these needs docker, the submodules or the network beyond NuGet — they work on a plain clone, which is
+exactly what CI runs: `.github/workflows/ci.yml` builds and tests the **committed** stubs and never builds the
+compiler image.
+
+`make test` runs the suite under `tests/` and fails when coverage of the **hand-written** sources drops below
+`COVERAGE_THRESHOLD` (100%). Everything under `api/` is excluded from the metric — it is machine output, and a
+percentage over it measures the generator rather than this repository — but it is still exercised hard: the suite
+round-trips every generated message through its wire format, checks every generated enum starts at its zero
+value, and binds every generated service client to a channel, asserting it exposes every RPC its service
+descriptor declares. Reports land in `coverage/` as cobertura and lcov.
 
 The generated project file carries no literal versions: it reads `$(OndewoPackageId)`,
 `$(OndewoPackageVersion)`, `$(OndewoTargetFramework)` and the three package-version properties as MSBuild
 properties. The `Makefile` reads those straight back out of the pinned
 `ondewo-proto-compiler/csharp/Dockerfile` and `export`s them, so a host build can never drift from what the image
-produces — and `dotnet build` **outside** `make` will fail with an empty `TargetFramework`. Always go through the
-`Makefile`.
+produces. A clone without that submodule — CI included — has no Dockerfile to read, so `Directory.Build.props`
+carries a committed fallback for each pin; it declares them only when they are still empty, so the `Makefile`
+always wins, and `make check_dotnet_properties` fails the build if the two ever disagree. Update both together.
 
 ### Adding hand-written code
 
 Anything you put in the repository is copied into the image's internal compile directory and picked up by the
 SDK's default `Compile` glob, so a hand-written `auth/Something.cs` ships inside the package with no barrel file
-to maintain — in C# the assembly *is* the barrel.
+to maintain — in C# the assembly *is* the barrel. `auth/OndewoAuth.cs` is the one example in the tree.
 
-The same glob is why a test project needs one line of help: add
+The same glob is why `Ondewo.NLU.Client.csproj` carries
 
 ```xml
 <Compile Remove="tests/**" />
 ```
 
-to the tracked `Ondewo.NLU.Client.csproj` before you create `tests/`, otherwise the test sources are
-compiled into the library itself and the build fails on the missing test-framework references.
+— without it the test sources, and `tests/**/obj/*AssemblyInfo.cs`, are compiled into the library itself.
+
+Hand-written code is what the coverage gate measures, so anything added here needs tests: `make test` fails below
+100% line, branch and method coverage of everything outside `api/`.
 
 ## Releasing
 
