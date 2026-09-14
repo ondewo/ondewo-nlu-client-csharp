@@ -21,9 +21,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
 
@@ -36,15 +36,21 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      # NO submodules. This job builds and tests the stubs that are COMMITTED under api/; it never
-      # builds the compiler image and never runs protoc - regenerating the stubs is a separate,
-      # slow, docker-bound concern driven by `make build` on a developer machine.
-      # The pins the generated project file reads live in the compiler submodule's Dockerfile and
-      # are mirrored into Directory.Build.props, which is what makes a submodule-free build work;
-      # `make check_dotnet_properties` is what keeps the two from drifting.
-      - uses: actions/checkout@v4
+      # The api submodule is NOT checked out. This job builds and tests the stubs that are COMMITTED
+      # under api/; it never builds the compiler image and never runs protoc - regenerating the
+      # stubs is a separate, slow, docker-bound concern driven by `make build` on a developer
+      # machine, and Directory.Build.props mirrors the pins so a build without it works.
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-dotnet@v4
+      # ...and the compiler submodule IS, on its own. `make check_dotnet_properties` below reads the
+      # pins out of its Dockerfile ARG lines, so with nothing on disk it had nothing to compare the
+      # committed Directory.Build.props against: it warned and exited 0, which made the step below a
+      # guaranteed no-op that had never once verified a pin. The target now fails in that situation,
+      # and this step is what keeps it able to do its job. One small public repository, depth 1.
+      - name: Check out the pinned proto-compiler submodule
+        run: git submodule update --init --depth 1 ondewo-proto-compiler
+
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
 
@@ -76,14 +82,14 @@ jobs:
       - name: Dry-run the NuGet publish
         run: make publish_dry_run
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: coverage
           path: coverage/
           if-no-files-found: error
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: nupkg
           path: |

@@ -44,10 +44,18 @@ jobs:
           fi
           echo "NUGET_API_KEY is configured."
 
-      # NO submodules - exactly like ci.yml. This job packs the stubs that are COMMITTED under
-      # api/; regenerating them is a docker-bound developer step that has already happened by the
-      # time the release tag exists.
-      - uses: actions/checkout@v4
+      # The api submodule is NOT checked out - exactly like ci.yml. This job packs the stubs that are
+      # COMMITTED under api/; regenerating them is a docker-bound developer step that has already
+      # happened by the time the release tag exists.
+      - uses: actions/checkout@v7
+
+      # ...and the compiler submodule IS, on its own. `make check_dotnet_properties` below reads the
+      # pins out of its Dockerfile ARG lines, so with nothing on disk it had nothing to compare the
+      # committed Directory.Build.props against: it warned and exited 0, which made the step below a
+      # guaranteed no-op that had never once verified a pin. The target now fails in that situation,
+      # and this step is what keeps it able to do its job. One small public repository, depth 1.
+      - name: Check out the pinned proto-compiler submodule
+        run: git submodule update --init --depth 1 ondewo-proto-compiler
 
       # The tag is what a consumer sees on GitHub; ONDEWO_NLU_VERSION is what ends up in the
       # <version> of the .nupkg. Publishing 7.1.0 off a tag called 7.1.1 is unrecoverable - the
@@ -67,7 +75,7 @@ jobs:
           fi
           echo "Releasing ${version} from tag ${GITHUB_REF_NAME}."
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
 
@@ -90,17 +98,24 @@ jobs:
       - name: Dry-run the NuGet publish
         run: make publish_dry_run
 
-      # The only step that needs the secret. `make push_to_nuget` is `@`-prefixed and hands the key
-      # to dotnet through the environment, so it never reaches the log; --skip-duplicate makes a
-      # re-run of an already-published version a no-op instead of a failure, which is what lets a
-      # release that died after the upload be resumed. Pushing the .nupkg uploads the .snupkg
-      # symbol package sitting beside it in nupkg/.
+      # The only step that needs the secret. `make push_to_nuget` is `@`-prefixed, so the key never
+      # reaches the LOG - but it is handed to `dotnet nuget push` as an --api-key argument and is
+      # therefore readable in the runner's process table while the upload runs. Neither alternative
+      # works here, both measured against a local push endpoint: NuGet reads the <apikeys> section
+      # of a NuGet.Config through EncryptionUtility.DecryptString, which fails with "Encryption is
+      # not supported on non-Windows platforms", and a response file (`... @file`) is expanded by
+      # the `dotnet` muxer, which re-execs NuGet.CommandLine.XPlat.dll with the key in the child's
+      # argv anyway. The runner is single-use and this job installs nothing third-party while the
+      # upload runs; the containing mitigation is a narrowly scoped key (Push only, glob Ondewo.*).
+      # --skip-duplicate makes a re-run of an already-published version a no-op instead of a
+      # failure, which is what lets a release that died after the upload be resumed. Pushing the
+      # .nupkg uploads the .snupkg symbol package sitting beside it in nupkg/.
       - name: Push to nuget.org
         env:
           NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
         run: make push_to_nuget
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: nupkg-${{ github.ref_name }}

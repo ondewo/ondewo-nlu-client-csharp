@@ -46,7 +46,7 @@ ONDEWO_NLU_VERSION=7.1.0
 # Submodule pins. Both are checked out by `make checkout_defined_submodule_versions`, so the
 # generated code is always reproducible from this file alone.
 ONDEWO_NLU_API_GIT_BRANCH=tags/7.1.0
-ONDEWO_PROTO_COMPILER_GIT_BRANCH=tags/5.15.0
+ONDEWO_PROTO_COMPILER_GIT_BRANCH=tags/5.15.1
 
 # You need to set up an access token at https://github.com/settings/tokens - permissions are important
 GITHUB_GH_TOKEN?=ENTER_YOUR_TOKEN_HERE
@@ -236,9 +236,13 @@ check_build: ## Checks that a csharp stub was generated for every compiled proto
 # generated them, so it is an error here rather than a surprise at run time.
 check_dotnet_properties: ## Verify the committed MSBuild pins match the pinned compiler Dockerfile
 	@if [ ! -f ${PROTO_COMPILER_DOCKERFILE} ]; then \
-		echo "$(YELLOW)[WARN]$(NC) ${PROTO_COMPILER_DOCKERFILE} is not checked out - building with the" ; \
-		echo "       fallback pins in ${DOTNET_PROPS_FILE}. Run 'make update_submodules' to verify them." ; \
-		exit 0 ; \
+		echo "$(RED)[ERROR]$(NC) ${PROTO_COMPILER_DOCKERFILE} is not checked out, so the pins committed in" ; \
+		echo "        ${DOTNET_PROPS_FILE} cannot be compared against anything and this target" ; \
+		echo "        cannot do its job. It used to warn and exit 0 here, which made it a no-op in" ; \
+		echo "        every submodule-free checkout - CI included - so it never once verified a pin." ; \
+		echo "        Check the one submodule out and re-run:" ; \
+		echo "            git submodule update --init ${ONDEWO_PROTO_COMPILER_DIR}" ; \
+		exit 1 ; \
 	fi ; \
 	rc=0 ; \
 	for pair in "OndewoTargetFramework=DOTNET_TARGET_FRAMEWORK" \
@@ -324,8 +328,35 @@ checkout_defined_submodule_versions: ## Check out the submodule versions pinned 
 ########################################################
 #		Release
 
+check_release_credentials: ## Assert both release credentials are usable before anything is pushed
+# The registry credential used to be exercised only by the very LAST step of `release`, long after
+# the release branch, the tag and the GitHub release had been pushed to origin. A missing NuGet key
+# then left an immovable tag behind, and `spc` refused every retry because that branch and tag now
+# existed - so the recovery was to hand-delete both from origin. Both credentials are therefore
+# checked here, while the release is still a no-op.
+	@rc=0 ; \
+	if [ -z "${GITHUB_GH_TOKEN}" ] || [ "${GITHUB_GH_TOKEN}" = "ENTER_YOUR_TOKEN_HERE" ]; then \
+		echo "$(RED)[ERROR]$(NC) GITHUB_GH_TOKEN is not set - create one at https://github.com/settings/tokens" ; \
+		rc=1 ; \
+	fi ; \
+	if [ -z "${NUGET_API_KEY}" ] || [ "${NUGET_API_KEY}" = "ENTER_HERE_YOUR_NUGET_API_KEY" ]; then \
+		echo "$(RED)[ERROR]$(NC) NUGET_API_KEY is not set - create one at https://www.nuget.org/account/apikeys" ; \
+		echo "        scoped to Push for the glob pattern 'Ondewo.*', and add it to" ; \
+		echo "        ondewo-devops-accounts/account_nuget.env (make ondewo_release reads it from there)" ; \
+		rc=1 ; \
+	fi ; \
+	if [ $$rc -ne 0 ]; then \
+		echo "$(RED)[ERROR]$(NC) refusing to start a release that cannot finish it" ; \
+		exit 1 ; \
+	fi ; \
+	echo "$(GREEN)[SUCCESS]$(NC) both release credentials are set"
+
 release: ## Automate the entire release process
 	@echo "$(BLUE)[INFO]$(NC) Start release ${ONDEWO_NLU_VERSION}"
+# FIRST, before anything is built, branched, tagged or pushed: a release that cannot reach GitHub or
+# nuget.org has to fail while it is still a no-op, not after a tag it cannot take back is on origin.
+	make check_release_credentials
+	make check_release_notes
 	make build
 	-make precommit_hooks_run_all_files
 	git status
@@ -364,7 +395,21 @@ login_to_gh: ## Login to Github CLI with Access Token
 	fi
 	@echo "${GITHUB_GH_TOKEN}" | gh auth login -p ssh --with-token
 
-build_gh_release: ## Generate Github Release with CLI
+check_release_notes: ## Assert RELEASE.md carries an entry for ONDEWO_NLU_VERSION
+# `gh release create -n ""` succeeds and publishes an EMPTY release, so an entry that was forgotten -
+# or a heading whose wording drifted away from what the CURRENT_RELEASE_NOTES flip-flop greps for -
+# is otherwise only noticed by whoever reads the release page afterwards, by which time the tag
+# exists and cannot be moved.
+	@notes="$(CURRENT_RELEASE_NOTES)"; \
+	if [ -z "$$notes" ]; then \
+		echo "$(RED)[ERROR]$(NC) RELEASE.md has no 'Release ONDEWO NLU Csharp Client ${ONDEWO_NLU_VERSION}' entry"; \
+		echo "        The GitHub release would be created with empty notes - add the entry, under that"; \
+		echo "        exact heading and terminated by the ***** separator, before releasing."; \
+		exit 1; \
+	fi; \
+	echo "$(GREEN)[SUCCESS]$(NC) RELEASE.md has release notes for ${ONDEWO_NLU_VERSION}"
+
+build_gh_release: check_release_notes ## Generate Github Release with CLI
 	gh release create --repo $(GH_REPO) "$(ONDEWO_NLU_VERSION)" -n "$(CURRENT_RELEASE_NOTES)" -t "Release ${ONDEWO_NLU_VERSION}"
 
 push_to_gh: login_to_gh build_gh_release ## Logs into GitHub CLI and releases
@@ -472,9 +517,17 @@ verify_nupkg_installs: ## Restore the packed package into a throwaway consumer p
 	}
 	@echo "$(GREEN)[SUCCESS]$(NC) a consumer can install ${OndewoPackageId} ${ONDEWO_NLU_VERSION} and its dependency graph"
 
-# `@`-prefixed so the API key never reaches the build log, and handed to dotnet through the
-# environment (the `export` at the top of this file exports every variable here) so it is not
-# spelled out in the recipe at all. Pushing the .nupkg also uploads the .snupkg sitting beside it.
+# `@`-prefixed so the API key never reaches the build log, and read from the environment rather
+# than written into the recipe (the `export` at the top of this file exports every variable here).
+# It IS still passed to `dotnet nuget push` as an --api-key ARGUMENT, so for the seconds the upload
+# takes it is readable in the machine's process table. That is not an oversight, it is the only
+# thing the tool supports on Linux; both alternatives were measured against a local push endpoint:
+#   * the <apikeys> section of a NuGet.Config is read through EncryptionUtility.DecryptString, which
+#     fails outright with "Encryption is not supported on non-Windows platforms";
+#   * a response file (`dotnet nuget push ... @file`) is expanded by the `dotnet` muxer, which then
+#     re-execs NuGet.CommandLine.XPlat.dll with the key spelled out in the CHILD's argv anyway.
+# Keep the key narrowly scoped instead (Push only, glob Ondewo.*) so it is worth little if it leaks.
+# Pushing the .nupkg also uploads the .snupkg sitting beside it.
 push_to_nuget: ## Publish the packed NuGet package to nuget.org
 	@if [ -z "${NUGET_API_KEY}" ] || [ "${NUGET_API_KEY}" = "ENTER_HERE_YOUR_NUGET_API_KEY" ]; then \
 		echo "$(RED)[ERROR]$(NC) NUGET_API_KEY is not set - create one at https://www.nuget.org/account/apikeys"; \
