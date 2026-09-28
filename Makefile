@@ -12,16 +12,25 @@ export
 #   make makefile_chapters     # list the section headers below
 #   make setup_developer_environment_locally
 #   make build                 # submodules -> compiler image -> stubs -> NuGet package
-#   make test                  # compile the generated library and run the test suite
+#   make test_via_docker_image # compile the generated library and run the test suite in docker
+#   make test                  # the same with a local .NET 10 SDK, which is how CI runs it
+#
+# Host requirements of `make build` and `make release`: make, git, docker and perl, plus the standard
+# shell tools (grep, sed, find, coreutils). The stubs are generated in the ondewo-proto-compiler image,
+# and every dotnet and gh call of a release runs in the utils image built from Dockerfile.utils (see
+# UTILS_DOCKER_RUN).
 #
 # Versioning: ONDEWO_NLU_VERSION (below) is the single source of truth. It MUST
 # match the ONDEWO NLU API in major and minor version. It is handed to MSBuild as
-# the $(OndewoPackageVersion) property, so no file has to be rewritten when it changes - only
-# this Makefile and RELEASE.md.
+# the $(OndewoPackageVersion) property, so no project file has to be rewritten when it changes.
+# The install snippets in README.md, which is packed as the package readme, are derived from it
+# by `make update_readme_version`, which `make release` runs itself.
 #
 # Overriding variables: pass on the command line, e.g. `make build ONDEWO_NLU_VERSION=1.2.3`,
-# or export in the environment. Credentials (GITHUB_GH_TOKEN, NUGET_API_KEY) are only ever read
-# at runtime and must never be committed.
+# or export in the environment. Credentials (GITHUB_GH_TOKEN, NUGET_API_KEY) live ONLY in the
+# ondewo-devops-accounts repository: `make ondewo_release` clones it and hands them to
+# `make release` at runtime. They are never committed here, and no CI workflow has them - the
+# whole release, publishing included, runs on the machine that runs `make ondewo_release`.
 # =====================================================================================
 
 # ---------------- BEFORE RELEASE ----------------
@@ -30,10 +39,12 @@ export
 # 3 - make build
 # -------------- Release Process Steps --------------
 # 1 - Get Credentials from devops-accounts repo
-# 2 - Create Release Branch and push
-# 3 - Create Release Tag and push
-# 4 - GitHub Release
-# 5 - NuGet Release
+# 2 - Check the credentials: both set, and the GitHub token may push here (utils image)
+# 3 - Build, test and dry-run the NuGet publish - everything that can fail, before any push
+# 4 - Commit and push, create Release Branch and push
+# 5 - Create Release Tag and push
+# 6 - NuGet Release (utils image)
+# 7 - GitHub Release (utils image) - LAST, so an existing GitHub release marks a complete release
 
 ########################################################
 # 		Variables
@@ -48,11 +59,12 @@ ONDEWO_NLU_VERSION=7.1.0
 ONDEWO_NLU_API_GIT_BRANCH=tags/7.1.0
 ONDEWO_PROTO_COMPILER_GIT_BRANCH=tags/5.15.1
 
-# You need to set up an access token at https://github.com/settings/tokens - permissions are important
+# Both credentials come from the ondewo-devops-accounts repository and nowhere else:
+# run_release_with_devops reads GITHUB_GH_TOKEN from account_github.env and NUGET_API_KEY from
+# account_nuget.env. The placeholders below only make an unset credential recognisable.
+# GITHUB_GH_TOKEN must be allowed to push to ${GH_REPO_SLUG} - validate_release_credentials proves it.
 GITHUB_GH_TOKEN?=ENTER_YOUR_TOKEN_HERE
-# You need to set up an API key at https://www.nuget.org/account/apikeys, scoped to
-# "Push" for the glob pattern Ondewo.*. Released from ondewo-devops-accounts/account_nuget.env
-# (see run_release_with_devops) and from the NUGET_API_KEY GitHub secret in release.yml.
+# NUGET_API_KEY is a nuget.org API key scoped to "Push" for the glob pattern Ondewo.*.
 NUGET_API_KEY?=ENTER_HERE_YOUR_NUGET_API_KEY
 NUGET_SOURCE?=https://api.nuget.org/v3/index.json
 
@@ -63,6 +75,7 @@ CURRENT_RELEASE_NOTES=`cat RELEASE.md \
 	| perl -ne 'print if /Release ONDEWO NLU Csharp Client ${ONDEWO_NLU_VERSION}/../^\*{5}/'`
 
 GH_REPO="https://github.com/ondewo/ondewo-nlu-client-csharp"
+GH_REPO_SLUG=ondewo/ondewo-nlu-client-csharp
 DEVOPS_ACCOUNT_GIT="ondewo-devops-accounts"
 DEVOPS_ACCOUNT_DIR="./${DEVOPS_ACCOUNT_GIT}"
 
@@ -81,6 +94,30 @@ ONDEWO_PROTOS_DIR=${ONDEWO_API_DIR}/${ONDEWO_PROTOS_SUBDIR}
 # from the pinned submodule.
 PROTO_COMPILER_IMAGE=ondewo-csharp-proto-compiler:latest
 PROTO_COMPILER_DOCKERFILE:=${ONDEWO_PROTO_COMPILER_DIR}/csharp/Dockerfile
+
+# --- Utils image: the .NET SDK and the GitHub CLI (Dockerfile.utils), so the host needs neither.
+IMAGE_UTILS_NAME=ondewo-nlu-client-utils-csharp:${ONDEWO_NLU_VERSION}
+# The prefix every *_via_docker_image target runs `make <inner target>` of THIS Makefile with -
+# append any `-e <CREDENTIAL>`, then ${IMAGE_UTILS_NAME} and the command.
+#   * --user: as the invoking user, so nothing root-owned lands in the working tree. HOME and the
+#     dotnet/NuGet caches therefore live in the container's world-writable /tmp, and never in the
+#     repository, whose default Compile glob would sweep a NuGet packages folder into the library.
+#   * The repository is mounted at its OWN path, so ${CURDIR} in the recipes and the absolute paths
+#     MSBuild writes into obj/ mean the same inside and outside the container.
+#   * A credential is passed by NAME only (`-e NUGET_API_KEY`): docker copies it from the
+#     environment the `export` at the top gives every recipe, so the value is in neither the
+#     recipe nor docker's argv.
+#   * The make inside the container re-reads this Makefile and sees none of the host's command-line
+#     overrides, so the two overridable (?=) settings are forwarded the same way: without that,
+#     `make push_to_nuget_via_docker_image NUGET_SOURCE=<test feed>` would push to nuget.org.
+UTILS_DOCKER_RUN=docker run --rm \
+	--user "$$(id -u):$$(id -g)" \
+	-e HOME=/tmp/home \
+	-e DOTNET_CLI_HOME=/tmp/home \
+	-e NUGET_PACKAGES=/tmp/home/.nuget/packages \
+	-e NUGET_SOURCE \
+	-e COVERAGE_THRESHOLD \
+	-v "${CURDIR}:${CURDIR}" -w "${CURDIR}"
 
 # --- MSBuild properties read by the generated project file
 # The generated <PackageId>.csproj deliberately carries no literal version: it reads
@@ -101,7 +138,7 @@ SNUPKG=${NUPKG_DIR}/${OndewoPackageId}.${ONDEWO_NLU_VERSION}.snupkg
 DRY_RUN_DIR=.nuget-dry-run
 # Keeps the .proto submodule out of the SDK's default Compile glob on a host build.
 OndewoProtosDir=${ONDEWO_API_DIR}
-# In a plain clone - CI included - the submodule is not checked out and every $(shell sed ...)
+# In a plain clone the submodule is not checked out and every $(shell sed ...)
 # below yields the empty string. Directory.Build.props then supplies a committed fallback for each
 # of them (it declares them only when they are still empty, so an exported value here always
 # wins), and `make check_dotnet_properties` fails the build when the two ever disagree.
@@ -147,6 +184,7 @@ TEST: ## Diagnostics - print the resolved build configuration and the current re
 	@echo "API submodule pin:    ${ONDEWO_NLU_API_GIT_BRANCH}"
 	@echo "Compiler pin:         ${ONDEWO_PROTO_COMPILER_GIT_BRANCH}"
 	@echo "Compiler image:       ${PROTO_COMPILER_IMAGE}"
+	@echo "Utils image:          ${IMAGE_UTILS_NAME}"
 	@echo "NuGet package id:     ${OndewoPackageId}"
 	@echo "Target framework:     ${OndewoTargetFramework}"
 	@echo "Google.Protobuf:      ${GoogleProtobufVersion}"
@@ -171,6 +209,11 @@ build_compiler: ## Build the proto compiler docker image from the pinned submodu
 		echo "$(RED)[ERROR]$(NC) ${PROTO_COMPILER_DOCKERFILE} is missing - run 'make update_submodules' first"; \
 		exit 1; \
 	}
+# The image COPYs image-data/ with the checkout's file modes, and generate_ondewo_protos runs it as the
+# invoking user, not root: a checkout made under `umask 077` (e.g. around a release log) lands root-owned
+# 0600 in the image ("compile-proto-2-csharp.sh: Permission denied"). a+rX only adds read, and search on
+# directories - git tracks neither, so the submodule stays clean.
+	chmod -R a+rX ${ONDEWO_PROTO_COMPILER_DIR}/csharp/image-data
 	cd ${ONDEWO_PROTO_COMPILER_DIR}/csharp && sh build.sh
 
 # Derived from ondewo-proto-compiler/csharp/example/run-compile.sh - same image tag and the same
@@ -185,6 +228,13 @@ build_compiler: ## Build the proto compiler docker image from the pinned submodu
 #     wipes exactly those three first, so a renamed or deleted proto leaves no orphan behind.
 #   * -e OndewoPackageVersion overrides the image default (which is the COMPILER version) with
 #     this client's version, so the packed .nupkg carries the right number.
+#   * --user: the container runs as the invoking user, so everything it writes to the output
+#     volume is owned by you and no chown - and no sudo - is needed afterwards. Two defaults of the
+#     image are root-owned and are moved to the world-writable /tmp for that: its compile directory
+#     /image-data/src (TEMP_SRC_DIRECTORY, an override compile-proto-2-csharp.sh supports), and the
+#     /tmp/.nuget the image build left behind as dotnet's home ("Failed to read NuGet.Config due to
+#     unauthorized access" - HOME / DOTNET_CLI_HOME). Its pre-warmed feed under /nuget is
+#     world-writable by design.
 generate_ondewo_protos: ## Generate the csharp gRPC client stubs and the NuGet package from the API protos
 	@test -d ${ONDEWO_PROTOS_DIR} || { \
 		echo "$(RED)[ERROR]$(NC) ${ONDEWO_PROTOS_DIR} is missing - run 'make update_submodules' first"; \
@@ -192,23 +242,15 @@ generate_ondewo_protos: ## Generate the csharp gRPC client stubs and the NuGet p
 	}
 	@echo "$(BLUE)[INFO]$(NC) Generating csharp stubs from ${ONDEWO_PROTOS_DIR} into api/ ..."
 	docker run --rm \
+		--user "$$(id -u):$$(id -g)" \
+		-e HOME=/tmp/home \
+		-e DOTNET_CLI_HOME=/tmp/home \
+		-e TEMP_SRC_DIRECTORY=/tmp/compile-src \
 		-e OndewoPackageVersion=${ONDEWO_NLU_VERSION} \
 		-v ${shell pwd}:/input-volume \
 		-v ${shell pwd}:/output-volume \
 		${PROTO_COMPILER_IMAGE} "${ONDEWO_API_DIR}" "${ONDEWO_PROTOS_SUBDIR}" "${OndewoPackageId}"
-	@$(MAKE) fix_generated_file_ownership
 	@echo "$(GREEN)[SUCCESS]$(NC) Generated api/, ${OndewoPackageId}.csproj, artifacts/ and nupkg/"
-
-# The csharp image writes under root-owned /image-data, so - unlike the python target - its
-# container must NOT run with --user, and everything it copies to the output volume lands owned
-# by root. Only the paths the image owns are touched, never the whole working tree.
-fix_generated_file_ownership: ## Take back ownership of the files the compiler container wrote as root
-	@for path in api artifacts nupkg ${OndewoPackageId}.csproj ; do \
-		if [ -e "$$path" ] && [ "$$(ls -ld "$$path" | awk '{print $$3}')" != "$$(id -un)" ]; then \
-			echo "$(BLUE)[INFO]$(NC) Taking ownership of $$path ..." ; \
-			sudo chown -R "$$(id -un):$$(id -gn)" "$$path" || exit 1 ; \
-		fi ; \
-	done
 
 # protoc emits one <PascalCase(basename)>.cs per proto plus one <PascalCase(basename)>Grpc.cs per
 # proto that declares a service, so the file count is NOT a fixed multiple of the proto count.
@@ -262,7 +304,7 @@ check_dotnet_properties: ## Verify the committed MSBuild pins match the pinned c
 	if [ $$rc -ne 0 ]; then exit 1 ; fi ; \
 	echo "$(GREEN)[SUCCESS]$(NC) the committed MSBuild pins match ${PROTO_COMPILER_DOCKERFILE}"
 
-build_library: check_dotnet_properties ## Compile the generated library on the host (no docker)
+build_library: check_dotnet_properties ## Compile the generated library with the dotnet on PATH (in docker: test_via_docker_image)
 	@test -f ${OndewoPackageId}.csproj || { \
 		echo "$(RED)[ERROR]$(NC) ${OndewoPackageId}.csproj is missing - run 'make build' first"; \
 		exit 1; \
@@ -303,7 +345,7 @@ test: build_library ## Run the csharp test suite over the committed stubs, gated
 # nobody wants. It is safe to be this strict only because --no-build implies --no-restore: the
 # restore-time NuGet audit advisories (NU19xx), which appear when a CVE is published for a
 # dependency and have nothing to do with packaging, cannot reach this step.
-pack: build_library ## Pack the NuGet package (.nupkg + .snupkg) on the host into nupkg/
+pack: build_library ## Pack the NuGet package (.nupkg + .snupkg) into nupkg/ with the dotnet on PATH
 	dotnet pack ${OndewoPackageId}.csproj -c Release --no-build -o ${NUPKG_DIR} -warnaserror
 
 clean: ## Remove the generated stubs, the build output and the packed packages
@@ -328,21 +370,23 @@ checkout_defined_submodule_versions: ## Check out the submodule versions pinned 
 ########################################################
 #		Release
 
-check_release_credentials: ## Assert both release credentials are usable before anything is pushed
+check_release_credentials: ## Assert both release credentials are set before anything is pushed
 # The registry credential used to be exercised only by the very LAST step of `release`, long after
 # the release branch, the tag and the GitHub release had been pushed to origin. A missing NuGet key
 # then left an immovable tag behind, and `spc` refused every retry because that branch and tag now
 # existed - so the recovery was to hand-delete both from origin. Both credentials are therefore
-# checked here, while the release is still a no-op.
+# checked here, while the release is still a no-op. This proves only that they are SET; whether the
+# GitHub token works is checked by validate_release_credentials.
 	@rc=0 ; \
 	if [ -z "${GITHUB_GH_TOKEN}" ] || [ "${GITHUB_GH_TOKEN}" = "ENTER_YOUR_TOKEN_HERE" ]; then \
-		echo "$(RED)[ERROR]$(NC) GITHUB_GH_TOKEN is not set - create one at https://github.com/settings/tokens" ; \
+		echo "$(RED)[ERROR]$(NC) GITHUB_GH_TOKEN is not set - make ondewo_release reads it from" ; \
+		echo "        ondewo-devops-accounts/account_github.env" ; \
 		rc=1 ; \
 	fi ; \
 	if [ -z "${NUGET_API_KEY}" ] || [ "${NUGET_API_KEY}" = "ENTER_HERE_YOUR_NUGET_API_KEY" ]; then \
-		echo "$(RED)[ERROR]$(NC) NUGET_API_KEY is not set - create one at https://www.nuget.org/account/apikeys" ; \
-		echo "        scoped to Push for the glob pattern 'Ondewo.*', and add it to" ; \
-		echo "        ondewo-devops-accounts/account_nuget.env (make ondewo_release reads it from there)" ; \
+		echo "$(RED)[ERROR]$(NC) NUGET_API_KEY is not set - make ondewo_release reads it from" ; \
+		echo "        ondewo-devops-accounts/account_nuget.env (a nuget.org API key scoped to Push" ; \
+		echo "        for the glob pattern 'Ondewo.*')" ; \
 		rc=1 ; \
 	fi ; \
 	if [ $$rc -ne 0 ]; then \
@@ -351,16 +395,25 @@ check_release_credentials: ## Assert both release credentials are usable before 
 	fi ; \
 	echo "$(GREEN)[SUCCESS]$(NC) both release credentials are set"
 
-release: ## Automate the entire release process
+release: ## Automate the entire release process - locally, publishing included
 	@echo "$(BLUE)[INFO]$(NC) Start release ${ONDEWO_NLU_VERSION}"
-# FIRST, before anything is built, branched, tagged or pushed: a release that cannot reach GitHub or
-# nuget.org has to fail while it is still a no-op, not after a tag it cannot take back is on origin.
+# FIRST, before anything is built, branched, tagged or pushed: a release with a missing credential or a
+# GitHub token that cannot push has to fail while it is still a no-op, not after a tag it cannot take
+# back is on origin. The utils image is built here because the token check already runs in it.
 	make check_release_credentials
+	make build_utils_docker_image
+	make validate_release_credentials_via_docker_image
 	make check_release_notes
+	make update_readme_version
 	make build
 	-make precommit_hooks_run_all_files
 	git status
 	make check_build
+# Everything else that can fail also runs HERE, inside the utils image, while the release is still a
+# no-op: the library build, the test suite with its coverage gate and the whole packaging path. The
+# package publish_dry_run leaves in nupkg/ is the one push_to_nuget uploads below.
+	make test_via_docker_image
+	make publish_dry_run_via_docker_image
 	git add api
 	git add ${OndewoPackageId}.csproj
 	git add Makefile
@@ -372,12 +425,18 @@ release: ## Automate the entire release process
 	git add ${ONDEWO_PROTO_COMPILER_DIR}
 	git add ${ONDEWO_API_DIR}
 	git status
-	-git commit --no-verify -m "Preparing for release ${ONDEWO_NLU_VERSION}"
+# Commit only when something is staged, and let a commit that FAILS stop the release. The old `-git
+# commit` ignored every failure - a missing git identity included - and then tagged and published the
+# previous commit under the new version.
+	git diff --cached --quiet || git commit --no-verify -m "Preparing for release ${ONDEWO_NLU_VERSION}"
 	git push
 	make create_release_branch
 	make create_release_tag
-	make push_to_gh
-	make publish
+# Past the tag only the two publishing steps remain, both in the utils image built above. NuGet goes
+# first and the GitHub release LAST, so a GitHub release exists only for a version that is complete
+# on nuget.org too.
+	make push_to_nuget_via_docker_image
+	make release_to_github_via_docker_image
 	@echo "$(GREEN)[SUCCESS]$(NC) Release finished"
 
 create_release_branch: ## Create Release Branch and push it to origin
@@ -390,10 +449,33 @@ create_release_tag: ## Create Release Tag and push it to origin
 
 login_to_gh: ## Login to Github CLI with Access Token
 	@if [ -z "${GITHUB_GH_TOKEN}" ] || [ "${GITHUB_GH_TOKEN}" = "ENTER_YOUR_TOKEN_HERE" ]; then \
-		echo "$(RED)[ERROR]$(NC) GITHUB_GH_TOKEN is not set - create one at https://github.com/settings/tokens"; \
+		echo "$(RED)[ERROR]$(NC) GITHUB_GH_TOKEN is not set - make ondewo_release reads it from ondewo-devops-accounts/account_github.env"; \
 		exit 1; \
 	fi
 	@echo "${GITHUB_GH_TOKEN}" | gh auth login -p ssh --with-token
+
+# The validity half of the credential check - check_release_credentials only proves the values are
+# SET. Read-only, and run in the utils image before anything is pushed:
+#   * login_to_gh is the very `gh auth login` push_to_gh runs at the end of the release, so a revoked,
+#     expired or under-scoped token fails HERE ("HTTP 401: Bad credentials", "missing required
+#     scope") instead of after the tag;
+#   * `gh api repos/<repo>` then returns the token's permissions on THIS repository, and the push to
+#     master, the release branch, the tag and the GitHub release all need push.
+# NUGET_API_KEY has no equivalent. nuget.org documents no read-only endpoint that accepts a push API
+# key: GET api/v2/verifykey takes only a one-time verify-scope key, and create-verification-key is a
+# POST that mints one (https://learn.microsoft.com/nuget/api/nuget-protocols). The key is therefore
+# first exercised by push_to_nuget, which is why that step is safe to re-run (--skip-duplicate).
+validate_release_credentials: login_to_gh ## Fail unless GITHUB_GH_TOKEN logs in and may push to the repository (read-only; needs gh)
+	@push=$$(gh api repos/${GH_REPO_SLUG} --jq .permissions.push) || { \
+		echo "$(RED)[ERROR]$(NC) could not read ${GH_REPO_SLUG} with GITHUB_GH_TOKEN"; \
+		exit 1; \
+	}; \
+	if [ "$$push" != "true" ]; then \
+		echo "$(RED)[ERROR]$(NC) GITHUB_GH_TOKEN works, but may not push to ${GH_REPO_SLUG} (permissions.push=$$push)"; \
+		echo "        - replace it in ondewo-devops-accounts/account_github.env before releasing"; \
+		exit 1; \
+	fi; \
+	echo "$(GREEN)[SUCCESS]$(NC) GITHUB_GH_TOKEN may push to ${GH_REPO_SLUG}"
 
 check_release_notes: ## Assert RELEASE.md carries an entry for ONDEWO_NLU_VERSION
 # `gh release create -n ""` succeeds and publishes an EMPTY release, so an entry that was forgotten -
@@ -415,17 +497,37 @@ build_gh_release: check_release_notes ## Generate Github Release with CLI
 push_to_gh: login_to_gh build_gh_release ## Logs into GitHub CLI and releases
 	@echo 'Released to Github'
 
+# README.md is packed as the package readme, so its install snippets are what the nuget.org page of
+# a version tells people to install - and release_all_clients in ondewo-nlu-api rewrites nothing
+# but this Makefile and RELEASE.md. `release` therefore derives them from ONDEWO_NLU_VERSION before
+# anything is packed, and stages README.md with the release commit. A snippet the patterns no longer
+# find is an error, not a README that silently keeps advertising the previous version.
+update_readme_version: ## Point the install snippets in README.md (the packed package readme) at ONDEWO_NLU_VERSION
+	perl -i -p \
+		-e 's/(Ondewo\.NLU\.Client --version )\S+/$${1}${ONDEWO_NLU_VERSION}/;' \
+		-e 's/(Include="Ondewo\.NLU\.Client" Version=")[^"]*/$${1}${ONDEWO_NLU_VERSION}/;' \
+		-e 's/(Install-Package Ondewo\.NLU\.Client -Version )\S+/$${1}${ONDEWO_NLU_VERSION}/;' \
+		README.md
+	@for snippet in 'Ondewo.NLU.Client --version ${ONDEWO_NLU_VERSION}' \
+		'Include="Ondewo.NLU.Client" Version="${ONDEWO_NLU_VERSION}"' \
+		'Install-Package Ondewo.NLU.Client -Version ${ONDEWO_NLU_VERSION}' ; do \
+		grep -qF "$$snippet" README.md || { \
+			echo "$(RED)[ERROR]$(NC) README.md has no '$$snippet' - adapt update_readme_version to it" ; \
+			exit 1 ; \
+		} ; \
+	done
+	@echo "$(GREEN)[SUCCESS]$(NC) README.md installs ${OndewoPackageId} ${ONDEWO_NLU_VERSION}"
+
 ########################################################
 #		NUGET
 
-publish: publish_dry_run push_to_nuget ## Verify the packed package, then publish it to nuget.org
-	@echo "$(GREEN)[SUCCESS]$(NC) ${OndewoPackageId} ${ONDEWO_NLU_VERSION} published to ${NUGET_SOURCE}"
-
-# The credential-free half of `publish`, and the only half CI ever runs. It exercises the whole
-# packaging path - pack, metadata, installability - so a package that nuget.org would reject, or
-# that nobody could consume, fails on an ordinary push instead of in the middle of a release.
+# The credential-free half of publishing. It exercises the whole packaging path - pack, metadata,
+# installability - so a package that nuget.org would reject, or that nobody could consume, fails
+# before `release` pushes anything instead of after the tag. `release` runs it in the utils image
+# (publish_dry_run_via_docker_image), and the package it leaves in nupkg/ is the one push_to_nuget
+# uploads.
 publish_dry_run: pack verify_nupkg_metadata verify_nupkg_installs ## Exercise the full packaging path without any credential
-	@echo "$(GREEN)[SUCCESS]$(NC) ${NUPKG} is ready to publish - run 'make publish' with NUGET_API_KEY set"
+	@echo "$(GREEN)[SUCCESS]$(NC) ${NUPKG} is ready to publish - make release uploads it with push_to_nuget_via_docker_image"
 
 # Asserts on the PACKED artefact rather than on the .csproj: a property can be silently dropped on
 # the way into the nuspec (PackageReadmeFile behind a false Exists() condition is exactly that), and
@@ -530,13 +632,12 @@ verify_nupkg_installs: ## Restore the packed package into a throwaway consumer p
 # Pushing the .nupkg also uploads the .snupkg sitting beside it.
 push_to_nuget: ## Publish the packed NuGet package to nuget.org
 	@if [ -z "${NUGET_API_KEY}" ] || [ "${NUGET_API_KEY}" = "ENTER_HERE_YOUR_NUGET_API_KEY" ]; then \
-		echo "$(RED)[ERROR]$(NC) NUGET_API_KEY is not set - create one at https://www.nuget.org/account/apikeys"; \
-		echo "        and add it to ondewo-devops-accounts/account_nuget.env, or pass it on the"; \
-		echo "        command line: make push_to_nuget NUGET_API_KEY=..."; \
+		echo "$(RED)[ERROR]$(NC) NUGET_API_KEY is not set - make ondewo_release reads it from"; \
+		echo "        ondewo-devops-accounts/account_nuget.env"; \
 		exit 1; \
 	fi
 	@test -f "${NUPKG}" || { \
-		echo "$(RED)[ERROR]$(NC) ${NUPKG} is missing - run 'make build' or 'make pack' first"; \
+		echo "$(RED)[ERROR]$(NC) ${NUPKG} is missing - run 'make publish_dry_run_via_docker_image' first"; \
 		exit 1; \
 	}
 	@test -f "${SNUPKG}" || { \
@@ -551,6 +652,33 @@ push_to_nuget: ## Publish the packed NuGet package to nuget.org
 	@echo "$(GREEN)[SUCCESS]$(NC) Released to NuGet"
 
 ########################################################
+#		UTILS IMAGE - dotnet and gh without installing either on the host
+
+build_utils_docker_image: ## Build the utils image (.NET SDK + gh) that every *_via_docker_image target runs in
+	docker build -f Dockerfile.utils -t ${IMAGE_UTILS_NAME} .
+
+test_via_docker_image: build_utils_docker_image ## Run `make test` inside the utils image - no local .NET SDK needed
+	${UTILS_DOCKER_RUN} ${IMAGE_UTILS_NAME} make test
+
+publish_dry_run_via_docker_image: build_utils_docker_image ## Run `make publish_dry_run` inside the utils image - no local .NET SDK needed
+	${UTILS_DOCKER_RUN} ${IMAGE_UTILS_NAME} make publish_dry_run
+
+validate_release_credentials_via_docker_image: build_utils_docker_image ## Run `make validate_release_credentials` inside the utils image (read-only, before any push)
+	@${UTILS_DOCKER_RUN} -e GITHUB_GH_TOKEN ${IMAGE_UTILS_NAME} make validate_release_credentials
+
+# The two publishing steps do NOT rebuild the image: `release` builds it before anything is pushed,
+# and a rebuild failing once the tag is on origin would leave a half-published release behind.
+# `release` uploads to nuget.org only through this target - no CI workflow publishes. --skip-duplicate
+# in push_to_nuget makes a re-run for a version nuget.org already has a no-op, so a release that
+# stopped at either step can be finished by running both steps again.
+push_to_nuget_via_docker_image: ## Publish the packed package to nuget.org inside the utils image (make push_to_nuget)
+	@${UTILS_DOCKER_RUN} -e NUGET_API_KEY ${IMAGE_UTILS_NAME} make push_to_nuget
+
+# The last step of `release`, so a GitHub release exists only for a version that is complete.
+release_to_github_via_docker_image: ## Create the GitHub release inside the utils image (make push_to_gh)
+	@${UTILS_DOCKER_RUN} -e GITHUB_GH_TOKEN ${IMAGE_UTILS_NAME} make push_to_gh
+
+########################################################
 #		DEVOPS-ACCOUNTS
 
 ondewo_release: spc clone_devops_accounts run_release_with_devops ## Release with credentials from devops-accounts repo
@@ -560,8 +688,12 @@ clone_devops_accounts: ## Clones devops-accounts repo
 	if [ -d $(DEVOPS_ACCOUNT_GIT) ]; then rm -Rf $(DEVOPS_ACCOUNT_GIT); fi
 	git clone git@bitbucket.org:ondewo/${DEVOPS_ACCOUNT_GIT}.git
 
+# Exactly the two credentials this client needs, and each from its own file. The greps are ANCHORED on
+# `^NAME=`: the devops files carry '#' comment lines that mention variable names, and an unanchored
+# grep hands such a line to the command line below, where its '#' comments out every credential
+# after it. `@` so make never echoes the expanded line - it carries the secrets.
 run_release_with_devops: ## Read credentials from the cloned devops-accounts repo and run the full release
-	$(eval info:= $(shell cat ${DEVOPS_ACCOUNT_DIR}/account_github.env | grep GITHUB_GH & cat ${DEVOPS_ACCOUNT_DIR}/account_nuget.env | grep NUGET_API_KEY))
+	$(eval info:= $(shell grep -E '^GITHUB_GH_TOKEN=' ${DEVOPS_ACCOUNT_DIR}/account_github.env; grep -E '^NUGET_API_KEY=' ${DEVOPS_ACCOUNT_DIR}/account_nuget.env))
 	@make release $(info)
 
 spc: ## Checks if the Release Branch and Tag already exist

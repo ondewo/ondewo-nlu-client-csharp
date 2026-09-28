@@ -51,8 +51,10 @@ Never edit a file under `api/` directly: the next `make build` deletes it.
 ```shell
 make precommit_hooks_run_all_files   ## markdownlint + hygiene hooks
 make build                           ## regenerate the stubs from the pinned submodules
-make test                            ## compile the library and run the test suite
+make test_via_docker_image           ## compile the library and run the test suite in docker
 ```
+
+`make test` runs the same suite with a local .NET 10 SDK instead of docker.
 
 Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/) (`feat: …`, `fix(scope): …`,
 `docs: …`). The `giticket` hook reads the ticket id from the branch name and prepends `[<ticket>]` for you, so do

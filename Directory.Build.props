@@ -8,8 +8,8 @@
        ARG lines; the Makefile reads them back out of that same pinned Dockerfile and exports
        them, so a host build cannot drift from the image that generated api/.
 
-       Neither source exists in a plain clone: the pins live in the ondewo-proto-compiler
-       submodule, and CI builds the COMMITTED stubs without checking any submodule out. Every
+       Neither source reaches a plain `dotnet build`: it does not go through the Makefile, and a
+       plain clone has not checked the ondewo-proto-compiler submodule out. Every
        property below is therefore declared only when it is still empty - an exported value from
        the Makefile always wins - and `make check_dotnet_properties` fails the build when these
        fallbacks and the pinned Dockerfile disagree, which is the only way they can drift.

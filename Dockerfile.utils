@@ -1,0 +1,33 @@
+# Utils image of ondewo-nlu-client-csharp: the .NET SDK and the GitHub CLI, so that the machine
+# running `make release` needs only make, git, docker, perl and the standard shell tools. Every
+# dotnet and gh call of a release runs in here through ${UTILS_DOCKER_RUN} - the GitHub token
+# check, the tests, the NuGet dry run and push and the GitHub release; code generation does NOT -
+# that stays in the ondewo-csharp-proto-compiler image.
+#
+# No sources are copied in: the Makefile mounts the repository at run time, so build output,
+# coverage and the packed .nupkg land in the working tree - owned by the invoking user, because
+# the container runs with --user.
+#
+# Pinned to an exact SDK patch on an explicit distro rather than a floating tag. .NET 10 because
+# the test project targets net10.0 and ci.yml sets up dotnet-version 10.0.x.
+FROM mcr.microsoft.com/dotnet/sdk:10.0.401-noble
+
+ENV LANG=C.UTF-8
+ENV DEBIAN_FRONTEND=noninteractive
+ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
+
+# make runs the targets, unzip is what verify_nupkg_metadata reads the packed nuspec with; git,
+# perl and curl ship with the base image and are listed so the image's contract is explicit.
+RUN apt-get update -qq \
+  && apt-get install -qq -y --no-install-recommends make unzip git perl curl ca-certificates \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# The GitHub CLI, from the same apt repository as in the other ONDEWO client utils images.
+RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+    && chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" > /etc/apt/sources.list.d/github-cli.list \
+    && apt-get update -qq \
+    && apt-get install -qq -y --no-install-recommends gh \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
