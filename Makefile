@@ -57,7 +57,7 @@ ONDEWO_NLU_VERSION=7.1.0
 # Submodule pins. Both are checked out by `make checkout_defined_submodule_versions`, so the
 # generated code is always reproducible from this file alone.
 ONDEWO_NLU_API_GIT_BRANCH=tags/7.1.0
-ONDEWO_PROTO_COMPILER_GIT_BRANCH=tags/5.15.1
+ONDEWO_PROTO_COMPILER_GIT_BRANCH=tags/5.15.2
 
 # Both credentials come from the ondewo-devops-accounts repository and nowhere else:
 # run_release_with_devops reads GITHUB_GH_TOKEN from account_github.env and NUGET_API_KEY from
