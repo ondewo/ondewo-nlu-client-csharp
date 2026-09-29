@@ -51,21 +51,21 @@ That resolves the latest stable version. To pin one — which is what you want i
 the client version tracks the ONDEWO NLU API in major and minor:
 
 ```shell
-dotnet add package Ondewo.NLU.Client --version 7.1.0
+dotnet add package Ondewo.NLU.Client --version 7.2.0
 ```
 
 Or write the `PackageReference` item into your `.csproj` directly:
 
 ```xml
 <ItemGroup>
-  <PackageReference Include="Ondewo.NLU.Client" Version="7.1.0" />
+  <PackageReference Include="Ondewo.NLU.Client" Version="7.2.0" />
 </ItemGroup>
 ```
 
 In the Visual Studio Package Manager Console:
 
 ```powershell
-Install-Package Ondewo.NLU.Client -Version 7.1.0
+Install-Package Ondewo.NLU.Client -Version 7.2.0
 ```
 
 A few things worth knowing before you take the dependency:

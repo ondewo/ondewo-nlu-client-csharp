@@ -25,7 +25,7 @@ namespace Ondewo.Nlu {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "CiNvbmRld28vbmx1L29wZXJhdGlvbl9tZXRhZGF0YS5wcm90bxIKb25kZXdv",
-            "Lm5sdRofZ29vZ2xlL3Byb3RvYnVmL3RpbWVzdGFtcC5wcm90byK1CQoRT3Bl",
+            "Lm5sdRofZ29vZ2xlL3Byb3RvYnVmL3RpbWVzdGFtcC5wcm90byLKCQoRT3Bl",
             "cmF0aW9uTWV0YWRhdGESNAoGc3RhdHVzGAEgASgOMiQub25kZXdvLm5sdS5P",
             "cGVyYXRpb25NZXRhZGF0YS5TdGF0dXMSHQoVcGFyZW50X29wZXJhdGlvbl9u",
             "YW1lGAIgASgJEhsKE3N1Yl9vcGVyYXRpb25fbmFtZXMYAyADKAkSLwoLY3Jl",
@@ -44,7 +44,7 @@ namespace Ondewo.Nlu {
             "YnVmLlRpbWVzdGFtcBISCgpjcmVhdGVkX2J5GBUgASgJEhMKC21vZGlmaWVk",
             "X2J5GBYgASgJImcKBlN0YXR1cxIWChJTVEFUVVNfVU5TUEVDSUZJRUQQABIP",
             "CgtOT1RfU1RBUlRFRBABEg8KC0lOX1BST0dSRVNTEAISCAoERE9ORRADEg0K",
-            "CUNBTkNFTExFRBAEEgoKBkZBSUxFRBAFIusCCg1PcGVyYXRpb25UeXBlEh4K",
+            "CUNBTkNFTExFRBAEEgoKBkZBSUxFRBAFIoADCg1PcGVyYXRpb25UeXBlEh4K",
             "Gk9QRVJBVElPTl9UWVBFX1VOU1BFQ0lGSUVEEAASEAoMQ1JFQVRFX0FHRU5U",
             "EAESEAoMSU1QT1JUX0FHRU5UEAISEAoMRVhQT1JUX0FHRU5UEAMSEAoMREVM",
             "RVRFX0FHRU5UEAQSEQoNUkVTVE9SRV9BR0VOVBAFEhUKEUJVSUxEX0FHRU5U",
@@ -52,7 +52,8 @@ namespace Ondewo.Nlu {
             "X0FHRU5UEAgSDwoLSU5ERVhfQUdFTlQQCRITCg9SVU5fUkFHX0NSQVdMRVIQ",
             "ChIlCiFBRERfUkFHX0NSQVdMRVJfUkVTVUxUX1RPX0RBVEFTRVQQCxIqCiZS",
             "RU1PVkVfUkFHX0NSQVdMRVJfUkVTVUxUX0ZST01fREFUQVNFVBAMEiIKHkNI",
-            "QU5HRV9EQVRBU0VUX0VNQkVERElOR19NT0RFTBANYgZwcm90bzM="));
+            "QU5HRV9EQVRBU0VUX0VNQkVERElOR19NT0RFTBANEhMKD1JFUEFSU0VfREFU",
+            "QVNFVBAOYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Google.Protobuf.WellKnownTypes.TimestampReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
@@ -1226,6 +1227,10 @@ namespace Ondewo.Nlu {
         /// change the embedding model of dataset that already contains parsed documents
         /// </summary>
         [pbr::OriginalName("CHANGE_DATASET_EMBEDDING_MODEL")] ChangeDatasetEmbeddingModel = 13,
+        /// <summary>
+        /// re-parse of all documents in a dataset
+        /// </summary>
+        [pbr::OriginalName("REPARSE_DATASET")] ReparseDataset = 14,
       }
 
     }
