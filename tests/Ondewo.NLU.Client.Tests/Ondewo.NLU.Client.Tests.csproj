@@ -23,6 +23,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Kestrel: the in-process TLS / mutual-TLS gRPC server of OndewoChannelFactoryTests. Ships
+         with the .NET SDK, so it adds no package download. -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="../../Ondewo.NLU.Client.csproj" />
   </ItemGroup>
 

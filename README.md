@@ -70,7 +70,7 @@ Install-Package Ondewo.NLU.Client -Version 7.3.0
 
 A few things worth knowing before you take the dependency:
 
-- **Target framework.** The package is built for `netstandard2.0`, so it is consumable from .NET
+- **Target framework.** The package is built for `netstandard2.0` and `net10.0`. The `netstandard2.0` build is consumable from .NET
   Framework 4.6.1+, .NET Core 2.0+ and every modern .NET. Note that gRPC over
   `Grpc.Net.Client` needs HTTP/2, which in practice means .NET Core 3.0+ / .NET 5+; on .NET
   Framework you additionally need `Grpc.Net.Client.Web` or the legacy `Grpc.Core` channel.
@@ -94,8 +94,9 @@ make setup_developer_environment_locally              ## Check out the submodule
 make build                                            ## Regenerate the stubs and pack the NuGet package
 ```
 
-The package targets `netstandard2.0`, so it is consumable from .NET Framework 4.6.1+, .NET Core 2.0+ and every
-modern .NET. It brings `Google.Protobuf`, `Grpc.Net.Client`, `Grpc.Core.Api` and `Google.Api.CommonProtos` with
+The package targets `netstandard2.0` and `net10.0`: the `netstandard2.0` build is consumable from .NET Framework
+4.6.1+, .NET Core 2.0+ and every modern .NET, and only the `net10.0` build carries the TLS / mutual-TLS channel
+factory (see [TLS, mutual TLS and certificates](#tls-mutual-tls-and-certificates)). It brings `Google.Protobuf`, `Grpc.Net.Client`, `Grpc.Core.Api` and `Google.Api.CommonProtos` with
 it — the versions are pinned by the compiler image, never by hand.
 
 ## Usage
@@ -130,6 +131,148 @@ var client = new SomeService.SomeServiceClient(channel);
 var response = await client.SomeRpcAsync(new SomeRequest());
 ```
 
+## TLS, mutual TLS and certificates
+
+gRPC encrypts with **TLS**. `OndewoChannelFactory.Create` (namespace `Ondewo.Nlu.Client.Connection`) builds the
+`GrpcChannel` every generated `<Service>.<Service>Client` takes from an `OndewoClientConfig`, with the same rules
+as the ONDEWO Python client. It is part of the package's **`net10.0`** build; a `netstandard2.0` consumer (.NET
+Framework, older .NET) does not get it, because the APIs it needs (`SocketsHttpHandler`,
+`SslClientAuthenticationOptions`, `X509Certificate2.CreateFromPem`) do not exist there.
+
+| Mode                                | `useSecureChannel` | Config fields                                                       |
+|-------------------------------------|--------------------|---------------------------------------------------------------------|
+| Plaintext (not for production)      | `false`            | none - a client identity is refused                                 |
+| TLS, platform trust store           | `true` (default)   | none                                                                |
+| TLS, custom CA                      | `true` (default)   | `grpcCert` = PEM of the CA that signed the server certificate       |
+| Mutual TLS                          | `true` (default)   | `grpcCert` (or the platform trust store) plus `grpcClientCert` and `grpcClientKey` |
+
+Rules the code enforces:
+
+- The three certificate fields hold **PEM content**, **not file paths**. Read the files yourself
+  (`File.ReadAllText`). A `grpcCert` or `grpcClientCert` without any PEM certificate in it - typically a path - is
+  refused with an `ArgumentException` that says so.
+- `grpcClientCert` and `grpcClientKey` go together: setting only one throws `ArgumentException` when the
+  `OndewoClientConfig` is built. Empty strings on both mean no client identity: plain server-authenticated TLS.
+- `useSecureChannel: false` with a client identity throws `ArgumentException` instead of silently dropping the
+  identity. A plaintext channel is allowed otherwise, and logs a warning naming `host:port` through the
+  `ILoggerFactory` you set on `GrpcChannelOptions.LoggerFactory` (nothing is logged without one; the SDK never
+  configures logging itself).
+- `grpcClientKey` must be an **unencrypted** PEM key (PKCS#8, PKCS#1 or SEC1). An encrypted key, or one that
+  belongs to another certificate, is refused with `ArgumentException`. Certificates after the first one in
+  `grpcClientCert` are sent along as intermediates.
+- With `grpcCert` set, the server certificate must chain to one of the certificates in it - the platform trust
+  store is not consulted, and revocation is not checked (as in grpc-core). The host you connect to must match one
+  of the certificate's subject alternative names (SAN); there is no name override, so connect by a name in the SAN.
+- A bare IPv6 literal host is bracketed (`::1` becomes `https://[::1]:50055`); CRLF line endings in PEMs work.
+- No exception message renders a PEM, a key or the config; `OndewoClientConfig.ToString()` prints the key as
+  `***REDACTED***` (empty when it is empty) and the certificates only by their length.
+
+```csharp
+using System.IO;
+using Grpc.Core;
+using Grpc.Net.Client;
+using Ondewo.Nlu.Client.Auth;
+using Ondewo.Nlu.Client.Connection;
+
+var config = new OndewoClientConfig(
+    host: "ondewo.example.com",
+    port: 50055,
+    grpcCert: File.ReadAllText("certs/ca.pem"),
+    grpcClientCert: File.ReadAllText("certs/client.pem"),  // leave both out for server-authenticated TLS
+    grpcClientKey: File.ReadAllText("certs/client.key"));
+
+// One channel for every service client of this server; dispose it when they are all done.
+using GrpcChannel channel = OndewoChannelFactory.Create(config, options =>
+{
+    // Optional: a bearer token on every call, and a logger for gRPC and this SDK.
+    options.Credentials = ChannelCredentials.Create(
+        ChannelCredentials.SecureSsl, OndewoAuth.CreateBearerCredentials(accessToken));
+    options.LoggerFactory = loggerFactory;
+});
+var client = new SomeService.SomeServiceClient(channel);
+```
+
+The `configure` callback runs after the defaults below are applied, so it can change any of them. Replacing
+`HttpHandler` or `HttpClient` there discards the TLS setup; `OndewoChannelFactory.CreateHttpHandler(config)` returns
+the configured `SocketsHttpHandler` if you build your own `GrpcChannelOptions`.
+
+### Channel defaults
+
+The defaults of the Python client, mapped to what `Grpc.Net.Client` exposes:
+
+| Python channel option                                | .NET                                                         |
+|------------------------------------------------------|--------------------------------------------------------------|
+| `grpc.keepalive_time_ms=30000`                       | `SocketsHttpHandler.KeepAlivePingDelay` = 30 s               |
+| `grpc.http2.ping_timeout_ms=20000`                   | `SocketsHttpHandler.KeepAlivePingTimeout` = 20 s             |
+| `grpc.keepalive_permit_without_calls=0`              | `KeepAlivePingPolicy = HttpKeepAlivePingPolicy.WithActiveRequests` |
+| `grpc.http2.max_pings_without_data=2`                | not exposed by .NET: pings are sent only while calls are active |
+| `grpc.keepalive_timeout_ms=20000` (`TCP_USER_TIMEOUT`) | not exposed by .NET; the 20 s ping timeout detects a dead connection |
+| `grpc.max_reconnect_backoff_ms=5000`                 | `GrpcChannelOptions.MaxReconnectBackoff` = 5 s               |
+| max send / receive message length 2^31-1             | `MaxSendMessageSize` / `MaxReceiveMessageSize` = `int.MaxValue` |
+| per-method retry policy (idempotent methods only)    | not configured: `Grpc.Net.Client` retries nothing without a service config |
+
+`EnableMultipleHttp2Connections` is on and pooled connections never idle out, as the `Grpc.Net.Client` docs
+recommend for long-lived channels.
+
+### A test PKI with openssl
+
+A CA, a server certificate with SANs, and a client certificate with the `clientAuth` extended key usage. For tests
+only: the keys are unencrypted.
+
+```bash
+openssl req -x509 -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -nodes -days 365 \
+  -subj "/CN=Test CA" -keyout ca.key -out ca.pem
+
+printf 'subjectAltName=DNS:localhost,IP:127.0.0.1\nextendedKeyUsage=serverAuth\n' > server.ext
+openssl req -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -nodes \
+  -subj "/CN=localhost" -keyout server.key -out server.csr
+openssl x509 -req -in server.csr -CA ca.pem -CAkey ca.key -CAcreateserial -days 365 \
+  -extfile server.ext -out server.pem
+
+printf 'extendedKeyUsage=clientAuth\n' > client.ext
+openssl req -newkey ec -pkeyopt ec_paramgen_curve:prime256v1 -nodes \
+  -subj "/CN=my-client" -keyout client.key -out client.csr
+openssl x509 -req -in client.csr -CA ca.pem -CAkey ca.key -CAcreateserial -days 365 \
+  -extfile client.ext -out client.pem
+
+chmod 600 *.key
+openssl verify -CAfile ca.pem server.pem client.pem
+```
+
+The client then uses `ca.pem` / `client.pem` / `client.key`; a server that requires client certificates uses
+`server.pem` / `server.key` and trusts `ca.pem` for its clients. An encrypted key is decrypted with
+`openssl pkey -in encrypted.key -out client.key`.
+
+The test suite builds the same kind of PKI in code at test time (`tests/*/TlsTestPki.cs`) and runs real
+handshakes against an in-process Kestrel server, so no private key is committed.
+
+### TLS security notes
+
+- `OndewoClientConfig` holds `grpcClientKey` as a plain managed string for the lifetime of the config, and .NET
+  cannot wipe it from memory. Load it from a file (mode `0600`, never committed) or a secret store at startup, and
+  keep the config's lifetime short if that matters to you.
+- `ToString()` redacts the key, but do not log the PEM strings you pass in, or the files they came from.
+- This SDK has no serialization of the config, so nothing it does writes the key anywhere.
+
+### TLS troubleshooting
+
+A failed handshake is an `RpcException`; `Grpc.Net.Client` reports a certificate the client refused as
+`StatusCode.Internal` (grpc-core and the Python client say `UNAVAILABLE`) and a connection the server dropped as
+`StatusCode.Unavailable`. The cause is in `exception.Status.DebugException` and its inner exceptions:
+
+- **`The remote certificate is invalid because of errors in the certificate chain: PartialChain`** (or
+  `UntrustedRoot`): `grpcCert` is not the CA that issued the server certificate, or `grpcCert` is empty and the
+  server uses a private CA, or the server does not send its intermediate certificates.
+- **`The remote certificate is invalid according to the validation procedure: RemoteCertificateNameMismatch`**:
+  the host you connect to is not in the server certificate's SAN. Connect by a name in the SAN, or add the SAN.
+- **`An HTTP/2 connection could not be established because the server did not complete the HTTP/2 handshake`**
+  against a server that requires client certificates: no client certificate was presented, or one the server's CA
+  did not issue. The server log names the reason. Set `grpcClientCert` / `grpcClientKey`.
+- **`ArgumentException: ... contains no PEM certificate ... not a file path`**: a certificate field holds a path or
+  other non-PEM text. Pass `File.ReadAllText(path)`.
+- **`ArgumentException: ... could not be loaded as a PEM certificate and its unencrypted private key`**: the key is
+  encrypted, malformed, or belongs to another certificate.
+
 ## Repository structure
 
 ```
@@ -137,7 +280,8 @@ var response = await client.SomeRpcAsync(new SomeRequest());
 ├── api                                      <----- generated stubs, nested by C# namespace
 │   └── Ondewo
 │       └── ...
-├── auth                                     <----- the only hand-written sources in the package
+├── auth                                     <----- hand-written: bearer-token helpers
+├── connection                               <----- hand-written: TLS / mutual-TLS channel factory (net10.0)
 ├── tests                                    <----- xunit suite over the committed stubs
 ├── artifacts                                <----- compiled assembly, symbols, XML docs (not tracked)
 ├── coverage                                 <----- cobertura/lcov written by `make test` (not tracked)
@@ -227,7 +371,7 @@ Update both together.
 
 Anything you put in the repository is copied into the image's internal compile directory and picked up by the
 SDK's default `Compile` glob, so a hand-written `auth/Something.cs` ships inside the package with no barrel file
-to maintain — in C# the assembly *is* the barrel. `auth/OndewoAuth.cs` is the one example in the tree.
+to maintain — in C# the assembly *is* the barrel. `auth/OndewoAuth.cs` and `connection/` are the examples in the tree.
 
 The same glob is why `Ondewo.NLU.Client.csproj` carries
 
