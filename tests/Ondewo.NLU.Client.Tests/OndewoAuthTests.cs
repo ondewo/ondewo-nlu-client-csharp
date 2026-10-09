@@ -8,7 +8,7 @@ using Xunit;
 namespace Ondewo.Nlu.Client.Tests
 {
     /// <summary>
-    /// Covers <see cref="OndewoAuth"/>, the only hand-written source in this package. `make test`
+    /// Covers <see cref="OndewoAuth"/>, one of the hand-written sources in this package. `make test`
     /// gates on 100% line and branch coverage of it, generated stubs excluded, so every branch
     /// below has to stay exercised.
     /// </summary>
