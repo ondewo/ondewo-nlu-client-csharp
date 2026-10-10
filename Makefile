@@ -52,7 +52,7 @@ export
 
 # MUST BE THE SAME AS THE API in Major and Minor Version Number
 # example: API 1.2.0 --> Client 1.2.X
-ONDEWO_NLU_VERSION=7.3.0
+ONDEWO_NLU_VERSION=7.3.1
 
 # Submodule pins. Both are checked out by `make checkout_defined_submodule_versions`, so the
 # generated code is always reproducible from this file alone.
