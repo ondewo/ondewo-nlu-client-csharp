@@ -191,8 +191,10 @@ TEST: ## Diagnostics - print the resolved build configuration and the current re
 	@echo "Grpc.Net.Client:      ${GrpcDotnetVersion}"
 	@echo "Google.Api.CommonProtos: ${GoogleApiCommonProtosVersion}"
 	@echo "NuGet source:         ${NUGET_SOURCE}"
-	@echo "GITHUB_GH_TOKEN set:  $(if $(filter-out ENTER_YOUR_TOKEN_HERE,$(GITHUB_GH_TOKEN)),yes,no)"
-	@echo "NUGET_API_KEY set:    $(if $(filter-out ENTER_HERE_YOUR_NUGET_API_KEY,$(NUGET_API_KEY)),yes,no)"
+	@if [ -n "$${GITHUB_GH_TOKEN}" ] && [ "$${GITHUB_GH_TOKEN}" != "ENTER_YOUR_TOKEN_HERE" ]; then \
+		echo "GITHUB_GH_TOKEN set:  yes"; else echo "GITHUB_GH_TOKEN set:  no"; fi
+	@if [ -n "$${NUGET_API_KEY}" ] && [ "$${NUGET_API_KEY}" != "ENTER_HERE_YOUR_NUGET_API_KEY" ]; then \
+		echo "NUGET_API_KEY set:    yes"; else echo "NUGET_API_KEY set:    no"; fi
 	@printf '\n%s\n' "${CURRENT_RELEASE_NOTES}"
 
 ########################################################
@@ -378,12 +380,12 @@ check_release_credentials: ## Assert both release credentials are set before any
 # checked here, while the release is still a no-op. This proves only that they are SET; whether the
 # GitHub token works is checked by validate_release_credentials.
 	@rc=0 ; \
-	if [ -z "${GITHUB_GH_TOKEN}" ] || [ "${GITHUB_GH_TOKEN}" = "ENTER_YOUR_TOKEN_HERE" ]; then \
+	if [ -z "$${GITHUB_GH_TOKEN}" ] || [ "$${GITHUB_GH_TOKEN}" = "ENTER_YOUR_TOKEN_HERE" ]; then \
 		echo "$(RED)[ERROR]$(NC) GITHUB_GH_TOKEN is not set - make ondewo_release reads it from" ; \
 		echo "        ondewo-devops-accounts/account_github.env" ; \
 		rc=1 ; \
 	fi ; \
-	if [ -z "${NUGET_API_KEY}" ] || [ "${NUGET_API_KEY}" = "ENTER_HERE_YOUR_NUGET_API_KEY" ]; then \
+	if [ -z "$${NUGET_API_KEY}" ] || [ "$${NUGET_API_KEY}" = "ENTER_HERE_YOUR_NUGET_API_KEY" ]; then \
 		echo "$(RED)[ERROR]$(NC) NUGET_API_KEY is not set - make ondewo_release reads it from" ; \
 		echo "        ondewo-devops-accounts/account_nuget.env (a nuget.org API key scoped to Push" ; \
 		echo "        for the glob pattern 'Ondewo.*')" ; \
@@ -448,11 +450,11 @@ create_release_tag: ## Create Release Tag and push it to origin
 	git push origin ${ONDEWO_NLU_VERSION}
 
 login_to_gh: ## Login to Github CLI with Access Token
-	@if [ -z "${GITHUB_GH_TOKEN}" ] || [ "${GITHUB_GH_TOKEN}" = "ENTER_YOUR_TOKEN_HERE" ]; then \
+	@if [ -z "$${GITHUB_GH_TOKEN}" ] || [ "$${GITHUB_GH_TOKEN}" = "ENTER_YOUR_TOKEN_HERE" ]; then \
 		echo "$(RED)[ERROR]$(NC) GITHUB_GH_TOKEN is not set - make ondewo_release reads it from ondewo-devops-accounts/account_github.env"; \
 		exit 1; \
 	fi
-	@echo "${GITHUB_GH_TOKEN}" | gh auth login -p ssh --with-token
+	@echo "$${GITHUB_GH_TOKEN}" | gh auth login -p ssh --with-token
 
 # The validity half of the credential check - check_release_credentials only proves the values are
 # SET. Read-only, and run in the utils image before anything is pushed:
@@ -619,19 +621,18 @@ verify_nupkg_installs: ## Restore the packed package into a throwaway consumer p
 	}
 	@echo "$(GREEN)[SUCCESS]$(NC) a consumer can install ${OndewoPackageId} ${ONDEWO_NLU_VERSION} and its dependency graph"
 
-# `@`-prefixed so the API key never reaches the build log, and read from the environment rather
-# than written into the recipe (the `export` at the top of this file exports every variable here).
-# It IS still passed to `dotnet nuget push` as an --api-key ARGUMENT, so for the seconds the upload
-# takes it is readable in the machine's process table. That is not an oversight, it is the only
-# thing the tool supports on Linux; both alternatives were measured against a local push endpoint:
-#   * the <apikeys> section of a NuGet.Config is read through EncryptionUtility.DecryptString, which
-#     fails outright with "Encryption is not supported on non-Windows platforms";
-#   * a response file (`dotnet nuget push ... @file`) is expanded by the `dotnet` muxer, which then
-#     re-execs NuGet.CommandLine.XPlat.dll with the key spelled out in the CHILD's argv anyway.
-# Keep the key narrowly scoped instead (Push only, glob Ondewo.*) so it is worth little if it leaks.
-# Pushing the .nupkg also uploads the .snupkg sitting beside it.
+# The API key never reaches an argv. `dotnet nuget push` reads it from the NUGET_API_KEY environment
+# variable when --api-key is not given (the `export` at the top of this file exports it), so neither
+# the shell nor the NuGet.CommandLine.XPlat.dll the `dotnet` muxer re-execs ever carries it on its
+# command line, which /proc/<pid>/cmdline shows to every user of the machine. That fallback exists
+# from .NET SDK 10.0.400 on (`dotnet nuget push --help` documents it); an older SDK would silently
+# push WITHOUT a key, hence the guard below. A NuGet.Config <apikeys> entry is no alternative: on
+# Linux it fails with "Encryption is not supported on non-Windows platforms" (measured, SDK 10.0.401).
+# The utils image pins SDK 10.0.401 and push_to_nuget_via_docker_image forwards the key by NAME.
+# Keep the key narrowly scoped anyway (Push only, glob Ondewo.*).
+# Pushing the .nupkg also uploads the .snupkg sitting beside it, with the same key.
 push_to_nuget: ## Publish the packed NuGet package to nuget.org
-	@if [ -z "${NUGET_API_KEY}" ] || [ "${NUGET_API_KEY}" = "ENTER_HERE_YOUR_NUGET_API_KEY" ]; then \
+	@if [ -z "$${NUGET_API_KEY}" ] || [ "$${NUGET_API_KEY}" = "ENTER_HERE_YOUR_NUGET_API_KEY" ]; then \
 		echo "$(RED)[ERROR]$(NC) NUGET_API_KEY is not set - make ondewo_release reads it from"; \
 		echo "        ondewo-devops-accounts/account_nuget.env"; \
 		exit 1; \
@@ -645,8 +646,12 @@ push_to_nuget: ## Publish the packed NuGet package to nuget.org
 		exit 1; \
 	}
 	@echo "$(BLUE)[INFO]$(NC) Pushing ${OndewoPackageId} ${ONDEWO_NLU_VERSION} (+ symbols) to ${NUGET_SOURCE} ..."
+	@dotnet nuget push --help 2>/dev/null | grep -q NUGET_API_KEY || { \
+		echo "$(RED)[ERROR]$(NC) this .NET SDK's 'dotnet nuget push' cannot read NUGET_API_KEY from the"; \
+		echo "        environment (SDK 10.0.400 and later can) - install a current .NET 10 SDK"; \
+		exit 1; \
+	}
 	@dotnet nuget push "${NUPKG}" \
-		--api-key "$$NUGET_API_KEY" \
 		--source ${NUGET_SOURCE} \
 		--skip-duplicate
 	@echo "$(GREEN)[SUCCESS]$(NC) Released to NuGet"
@@ -688,13 +693,16 @@ clone_devops_accounts: ## Clones devops-accounts repo
 	if [ -d $(DEVOPS_ACCOUNT_GIT) ]; then rm -Rf $(DEVOPS_ACCOUNT_GIT); fi
 	git clone git@bitbucket.org:ondewo/${DEVOPS_ACCOUNT_GIT}.git
 
-# Exactly the two credentials this client needs, and each from its own file. The greps are ANCHORED on
-# `^NAME=`: the devops files carry '#' comment lines that mention variable names, and an unanchored
-# grep hands such a line to the command line below, where its '#' comments out every credential
-# after it. `@` so make never echoes the expanded line - it carries the secrets.
+# Exactly the two credentials this client needs. The grep is ANCHORED on `^NAME=`: the devops files
+# carry '#' comment lines that mention variable names. The values reach the sub-make through its
+# ENVIRONMENT (`set -a`; the shell expands them at run time): `make release NAME=value` put every
+# credential on make's argv, which /proc/<pid>/cmdline shows to every user of the machine.
 run_release_with_devops: ## Read credentials from the cloned devops-accounts repo and run the full release
-	$(eval info:= $(shell grep -E '^GITHUB_GH_TOKEN=' ${DEVOPS_ACCOUNT_DIR}/account_github.env; grep -E '^NUGET_API_KEY=' ${DEVOPS_ACCOUNT_DIR}/account_nuget.env))
-	@make release $(info)
+	@set -a \
+		&& eval "$$(grep -h -E '^(GITHUB_GH_TOKEN|NUGET_API_KEY)=' \
+			${DEVOPS_ACCOUNT_DIR}/account_github.env ${DEVOPS_ACCOUNT_DIR}/account_nuget.env)" \
+		&& set +a \
+		&& $(MAKE) release
 
 spc: ## Checks if the Release Branch and Tag already exist
 	$(eval filtered_branches:= $(shell git branch --all | grep -E "(^|[ /])release/$(subst .,\.,${ONDEWO_NLU_VERSION})$$"))

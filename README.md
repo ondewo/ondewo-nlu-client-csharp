@@ -451,8 +451,8 @@ finish a release that stopped at the GitHub release.
 `release` uploads to nuget.org only through `push_to_nuget_via_docker_image`. `NUGET_API_KEY` comes from
 `ondewo-devops-accounts/account_nuget.env` (read by `run_release_with_devops`) and must be an API key scoped to
 **Push** for the glob pattern `Ondewo.*`. The utils container gets it by name only (`docker run -e
-NUGET_API_KEY`), and the `@`-prefixed recipe that hands it to `dotnet nuget push --api-key` never echoes it into a
-build log. Pushing the `.nupkg` uploads the `.snupkg` beside it automatically.
+NUGET_API_KEY`), and `dotnet nuget push` reads it from the environment (.NET SDK 10.0.400+), so it is on no
+process's command line and in no build log. Pushing the `.nupkg` uploads the `.snupkg` beside it automatically.
 
 ## Contributing
 
