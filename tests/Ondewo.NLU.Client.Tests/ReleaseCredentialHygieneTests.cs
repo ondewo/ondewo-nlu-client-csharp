@@ -99,6 +99,21 @@ namespace Ondewo.Nlu.Client.Tests
         }
 
         [Fact]
+        public void TheReleasePublishesToNugetBeforeTheGithubRelease()
+        {
+            // A NuGet push that fails after the GitHub release would leave a GitHub release for a version that
+            // is not on nuget.org. The tag goes first: a GitHub release needs it.
+            List<string> steps = Recipe("release").Split('\n').Select(line => line.Trim()).ToList();
+            int tag = steps.IndexOf("make create_release_tag");
+            int nuget = steps.IndexOf("make push_to_nuget_via_docker_image");
+            int github = steps.IndexOf("make release_to_github_via_docker_image");
+
+            Assert.True(tag >= 0 && nuget >= 0 && github >= 0, "release must tag, push to NuGet and release to GitHub");
+            Assert.True(tag < nuget, "create_release_tag must run before the NuGet push");
+            Assert.True(nuget < github, "the NuGet push must run before the GitHub release");
+        }
+
+        [Fact]
         public void NoWorkflowInterpolatesASecretIntoARunScript()
         {
             // `${{ secrets.X }}` inside run: is substituted into the script text, i.e. bash's argv and
