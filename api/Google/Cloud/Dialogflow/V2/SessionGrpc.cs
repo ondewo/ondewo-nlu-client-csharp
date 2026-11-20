@@ -86,6 +86,18 @@ namespace Google.Cloud.Dialogflow.V2 {
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
     static readonly grpc::Marshaller<global::Google.Cloud.Dialogflow.V2.StreamingDetectIntentResponse> __Marshaller_ondewo_nlu_StreamingDetectIntentResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Google.Cloud.Dialogflow.V2.StreamingDetectIntentResponse.Parser));
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::Google.Cloud.Dialogflow.V2.InterruptTurnRequest> __Marshaller_ondewo_nlu_InterruptTurnRequest = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Google.Cloud.Dialogflow.V2.InterruptTurnRequest.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::Google.Cloud.Dialogflow.V2.InterruptTurnResponse> __Marshaller_ondewo_nlu_InterruptTurnResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Google.Cloud.Dialogflow.V2.InterruptTurnResponse.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::Google.Cloud.Dialogflow.V2.PrepareWarmTransferIntroRequest> __Marshaller_ondewo_nlu_PrepareWarmTransferIntroRequest = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Google.Cloud.Dialogflow.V2.PrepareWarmTransferIntroRequest.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::Google.Cloud.Dialogflow.V2.PrepareWarmTransferIntroResponse> __Marshaller_ondewo_nlu_PrepareWarmTransferIntroResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Google.Cloud.Dialogflow.V2.PrepareWarmTransferIntroResponse.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::Google.Cloud.Dialogflow.V2.GetWarmTransferIntroOutcomeRequest> __Marshaller_ondewo_nlu_GetWarmTransferIntroOutcomeRequest = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Google.Cloud.Dialogflow.V2.GetWarmTransferIntroOutcomeRequest.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Marshaller<global::Google.Cloud.Dialogflow.V2.WarmTransferIntroOutcome> __Marshaller_ondewo_nlu_WarmTransferIntroOutcome = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Google.Cloud.Dialogflow.V2.WarmTransferIntroOutcome.Parser));
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
     static readonly grpc::Marshaller<global::Google.Cloud.Dialogflow.V2.ListSessionsRequest> __Marshaller_ondewo_nlu_ListSessionsRequest = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Google.Cloud.Dialogflow.V2.ListSessionsRequest.Parser));
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
     static readonly grpc::Marshaller<global::Google.Cloud.Dialogflow.V2.ListSessionsResponse> __Marshaller_ondewo_nlu_ListSessionsResponse = grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::Google.Cloud.Dialogflow.V2.ListSessionsResponse.Parser));
@@ -259,6 +271,30 @@ namespace Google.Cloud.Dialogflow.V2 {
         "StreamingDetectIntent",
         __Marshaller_ondewo_nlu_StreamingDetectIntentRequest,
         __Marshaller_ondewo_nlu_StreamingDetectIntentResponse);
+
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Method<global::Google.Cloud.Dialogflow.V2.InterruptTurnRequest, global::Google.Cloud.Dialogflow.V2.InterruptTurnResponse> __Method_InterruptTurn = new grpc::Method<global::Google.Cloud.Dialogflow.V2.InterruptTurnRequest, global::Google.Cloud.Dialogflow.V2.InterruptTurnResponse>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "InterruptTurn",
+        __Marshaller_ondewo_nlu_InterruptTurnRequest,
+        __Marshaller_ondewo_nlu_InterruptTurnResponse);
+
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Method<global::Google.Cloud.Dialogflow.V2.PrepareWarmTransferIntroRequest, global::Google.Cloud.Dialogflow.V2.PrepareWarmTransferIntroResponse> __Method_PrepareWarmTransferIntro = new grpc::Method<global::Google.Cloud.Dialogflow.V2.PrepareWarmTransferIntroRequest, global::Google.Cloud.Dialogflow.V2.PrepareWarmTransferIntroResponse>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "PrepareWarmTransferIntro",
+        __Marshaller_ondewo_nlu_PrepareWarmTransferIntroRequest,
+        __Marshaller_ondewo_nlu_PrepareWarmTransferIntroResponse);
+
+    [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+    static readonly grpc::Method<global::Google.Cloud.Dialogflow.V2.GetWarmTransferIntroOutcomeRequest, global::Google.Cloud.Dialogflow.V2.WarmTransferIntroOutcome> __Method_GetWarmTransferIntroOutcome = new grpc::Method<global::Google.Cloud.Dialogflow.V2.GetWarmTransferIntroOutcomeRequest, global::Google.Cloud.Dialogflow.V2.WarmTransferIntroOutcome>(
+        grpc::MethodType.Unary,
+        __ServiceName,
+        "GetWarmTransferIntroOutcome",
+        __Marshaller_ondewo_nlu_GetWarmTransferIntroOutcomeRequest,
+        __Marshaller_ondewo_nlu_WarmTransferIntroOutcome);
 
     [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
     static readonly grpc::Method<global::Google.Cloud.Dialogflow.V2.ListSessionsRequest, global::Google.Cloud.Dialogflow.V2.ListSessionsResponse> __Method_ListSessions = new grpc::Method<global::Google.Cloud.Dialogflow.V2.ListSessionsRequest, global::Google.Cloud.Dialogflow.V2.ListSessionsResponse>(
@@ -680,6 +716,57 @@ namespace Google.Cloud.Dialogflow.V2 {
       /// <returns>A task indicating completion of the handler.</returns>
       [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
       public virtual global::System.Threading.Tasks.Task StreamingDetectIntent(grpc::IAsyncStreamReader<global::Google.Cloud.Dialogflow.V2.StreamingDetectIntentRequest> requestStream, grpc::IServerStreamWriter<global::Google.Cloud.Dialogflow.V2.StreamingDetectIntentResponse> responseStream, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+      /// <summary>
+      /// Interrupts a turn of the session outside a &lt;code>StreamingDetectIntent&lt;/code> stream: cancels it, reports what
+      /// the user actually heard of its answer, or discards the session step of a preemptive draft. Meant for clients
+      /// without a call-length stream (e.g. a stop button) and for a heard report that arrives after the stream closed.
+      /// A voice client with an open stream sends the same &lt;code>TurnControl&lt;/code> on that stream instead
+      /// (&lt;code>StreamingDetectIntentRequest.turn_control&lt;/code>). Requires the permission to interrupt a turn of the
+      /// session's project.
+      /// </summary>
+      /// <param name="request">The request received from the client.</param>
+      /// <param name="context">The context of the server-side call handler being invoked.</param>
+      /// <returns>The response to send back to the client (wrapped by a task).</returns>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::System.Threading.Tasks.Task<global::Google.Cloud.Dialogflow.V2.InterruptTurnResponse> InterruptTurn(global::Google.Cloud.Dialogflow.V2.InterruptTurnRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+      /// <summary>
+      /// Prepares the intro session of a warm transfer: reads the history, the contexts and the slots of the source
+      /// (caller) session, renders the intro text (with an LLM within a time budget, or from the TEMPLATE when the LLM
+      /// fails or is not configured), strips every &lt;code>&amp;lt;SIP:…&amp;gt;&lt;/code> markup from it, and stores the text, the
+      /// configuration and the stage in the intro session, which must not exist yet. Writes no step into the source
+      /// session. Idempotent per (&lt;code>intro_session&lt;/code>, &lt;code>transfer_request_id&lt;/code>): a repeated request
+      /// answers the response of the first one. Answers &lt;code>UNIMPLEMENTED&lt;/code> when the server's warm transfer
+      /// feature is switched off, and &lt;code>FAILED_PRECONDITION&lt;/code> with &lt;code>reason=warm-intro-disabled-for-agent&lt;/code>
+      /// when &lt;code>Agent.warm_transfer_settings.enabled&lt;/code> is false. Requires the permission to run a warm transfer
+      /// intro of the session's project. See &lt;code>docs/warm_transfer.md&lt;/code>.
+      /// </summary>
+      /// <param name="request">The request received from the client.</param>
+      /// <param name="context">The context of the server-side call handler being invoked.</param>
+      /// <returns>The response to send back to the client (wrapped by a task).</returns>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::System.Threading.Tasks.Task<global::Google.Cloud.Dialogflow.V2.PrepareWarmTransferIntroResponse> PrepareWarmTransferIntro(global::Google.Cloud.Dialogflow.V2.PrepareWarmTransferIntroRequest request, grpc::ServerCallContext context)
+      {
+        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
+      }
+
+      /// <summary>
+      /// Returns the decision the target gave in the intro session of a warm transfer. Never returns the reason text
+      /// or the intro text. Answers &lt;code>UNIMPLEMENTED&lt;/code> when the server's warm transfer feature is switched off.
+      /// Requires the permission to run a warm transfer intro of the session's project.
+      /// </summary>
+      /// <param name="request">The request received from the client.</param>
+      /// <param name="context">The context of the server-side call handler being invoked.</param>
+      /// <returns>The response to send back to the client (wrapped by a task).</returns>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::System.Threading.Tasks.Task<global::Google.Cloud.Dialogflow.V2.WarmTransferIntroOutcome> GetWarmTransferIntroOutcome(global::Google.Cloud.Dialogflow.V2.GetWarmTransferIntroOutcomeRequest request, grpc::ServerCallContext context)
       {
         throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
       }
@@ -1393,6 +1480,210 @@ namespace Google.Cloud.Dialogflow.V2 {
       public virtual grpc::AsyncDuplexStreamingCall<global::Google.Cloud.Dialogflow.V2.StreamingDetectIntentRequest, global::Google.Cloud.Dialogflow.V2.StreamingDetectIntentResponse> StreamingDetectIntent(grpc::CallOptions options)
       {
         return CallInvoker.AsyncDuplexStreamingCall(__Method_StreamingDetectIntent, null, options);
+      }
+      /// <summary>
+      /// Interrupts a turn of the session outside a &lt;code>StreamingDetectIntent&lt;/code> stream: cancels it, reports what
+      /// the user actually heard of its answer, or discards the session step of a preemptive draft. Meant for clients
+      /// without a call-length stream (e.g. a stop button) and for a heard report that arrives after the stream closed.
+      /// A voice client with an open stream sends the same &lt;code>TurnControl&lt;/code> on that stream instead
+      /// (&lt;code>StreamingDetectIntentRequest.turn_control&lt;/code>). Requires the permission to interrupt a turn of the
+      /// session's project.
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
+      /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
+      /// <param name="cancellationToken">An optional token for canceling the call.</param>
+      /// <returns>The response received from the server.</returns>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::Google.Cloud.Dialogflow.V2.InterruptTurnResponse InterruptTurn(global::Google.Cloud.Dialogflow.V2.InterruptTurnRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return InterruptTurn(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      /// <summary>
+      /// Interrupts a turn of the session outside a &lt;code>StreamingDetectIntent&lt;/code> stream: cancels it, reports what
+      /// the user actually heard of its answer, or discards the session step of a preemptive draft. Meant for clients
+      /// without a call-length stream (e.g. a stop button) and for a heard report that arrives after the stream closed.
+      /// A voice client with an open stream sends the same &lt;code>TurnControl&lt;/code> on that stream instead
+      /// (&lt;code>StreamingDetectIntentRequest.turn_control&lt;/code>). Requires the permission to interrupt a turn of the
+      /// session's project.
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="options">The options for the call.</param>
+      /// <returns>The response received from the server.</returns>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::Google.Cloud.Dialogflow.V2.InterruptTurnResponse InterruptTurn(global::Google.Cloud.Dialogflow.V2.InterruptTurnRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.BlockingUnaryCall(__Method_InterruptTurn, null, options, request);
+      }
+      /// <summary>
+      /// Interrupts a turn of the session outside a &lt;code>StreamingDetectIntent&lt;/code> stream: cancels it, reports what
+      /// the user actually heard of its answer, or discards the session step of a preemptive draft. Meant for clients
+      /// without a call-length stream (e.g. a stop button) and for a heard report that arrives after the stream closed.
+      /// A voice client with an open stream sends the same &lt;code>TurnControl&lt;/code> on that stream instead
+      /// (&lt;code>StreamingDetectIntentRequest.turn_control&lt;/code>). Requires the permission to interrupt a turn of the
+      /// session's project.
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
+      /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
+      /// <param name="cancellationToken">An optional token for canceling the call.</param>
+      /// <returns>The call object.</returns>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual grpc::AsyncUnaryCall<global::Google.Cloud.Dialogflow.V2.InterruptTurnResponse> InterruptTurnAsync(global::Google.Cloud.Dialogflow.V2.InterruptTurnRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return InterruptTurnAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      /// <summary>
+      /// Interrupts a turn of the session outside a &lt;code>StreamingDetectIntent&lt;/code> stream: cancels it, reports what
+      /// the user actually heard of its answer, or discards the session step of a preemptive draft. Meant for clients
+      /// without a call-length stream (e.g. a stop button) and for a heard report that arrives after the stream closed.
+      /// A voice client with an open stream sends the same &lt;code>TurnControl&lt;/code> on that stream instead
+      /// (&lt;code>StreamingDetectIntentRequest.turn_control&lt;/code>). Requires the permission to interrupt a turn of the
+      /// session's project.
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="options">The options for the call.</param>
+      /// <returns>The call object.</returns>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual grpc::AsyncUnaryCall<global::Google.Cloud.Dialogflow.V2.InterruptTurnResponse> InterruptTurnAsync(global::Google.Cloud.Dialogflow.V2.InterruptTurnRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.AsyncUnaryCall(__Method_InterruptTurn, null, options, request);
+      }
+      /// <summary>
+      /// Prepares the intro session of a warm transfer: reads the history, the contexts and the slots of the source
+      /// (caller) session, renders the intro text (with an LLM within a time budget, or from the TEMPLATE when the LLM
+      /// fails or is not configured), strips every &lt;code>&amp;lt;SIP:…&amp;gt;&lt;/code> markup from it, and stores the text, the
+      /// configuration and the stage in the intro session, which must not exist yet. Writes no step into the source
+      /// session. Idempotent per (&lt;code>intro_session&lt;/code>, &lt;code>transfer_request_id&lt;/code>): a repeated request
+      /// answers the response of the first one. Answers &lt;code>UNIMPLEMENTED&lt;/code> when the server's warm transfer
+      /// feature is switched off, and &lt;code>FAILED_PRECONDITION&lt;/code> with &lt;code>reason=warm-intro-disabled-for-agent&lt;/code>
+      /// when &lt;code>Agent.warm_transfer_settings.enabled&lt;/code> is false. Requires the permission to run a warm transfer
+      /// intro of the session's project. See &lt;code>docs/warm_transfer.md&lt;/code>.
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
+      /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
+      /// <param name="cancellationToken">An optional token for canceling the call.</param>
+      /// <returns>The response received from the server.</returns>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::Google.Cloud.Dialogflow.V2.PrepareWarmTransferIntroResponse PrepareWarmTransferIntro(global::Google.Cloud.Dialogflow.V2.PrepareWarmTransferIntroRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return PrepareWarmTransferIntro(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      /// <summary>
+      /// Prepares the intro session of a warm transfer: reads the history, the contexts and the slots of the source
+      /// (caller) session, renders the intro text (with an LLM within a time budget, or from the TEMPLATE when the LLM
+      /// fails or is not configured), strips every &lt;code>&amp;lt;SIP:…&amp;gt;&lt;/code> markup from it, and stores the text, the
+      /// configuration and the stage in the intro session, which must not exist yet. Writes no step into the source
+      /// session. Idempotent per (&lt;code>intro_session&lt;/code>, &lt;code>transfer_request_id&lt;/code>): a repeated request
+      /// answers the response of the first one. Answers &lt;code>UNIMPLEMENTED&lt;/code> when the server's warm transfer
+      /// feature is switched off, and &lt;code>FAILED_PRECONDITION&lt;/code> with &lt;code>reason=warm-intro-disabled-for-agent&lt;/code>
+      /// when &lt;code>Agent.warm_transfer_settings.enabled&lt;/code> is false. Requires the permission to run a warm transfer
+      /// intro of the session's project. See &lt;code>docs/warm_transfer.md&lt;/code>.
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="options">The options for the call.</param>
+      /// <returns>The response received from the server.</returns>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::Google.Cloud.Dialogflow.V2.PrepareWarmTransferIntroResponse PrepareWarmTransferIntro(global::Google.Cloud.Dialogflow.V2.PrepareWarmTransferIntroRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.BlockingUnaryCall(__Method_PrepareWarmTransferIntro, null, options, request);
+      }
+      /// <summary>
+      /// Prepares the intro session of a warm transfer: reads the history, the contexts and the slots of the source
+      /// (caller) session, renders the intro text (with an LLM within a time budget, or from the TEMPLATE when the LLM
+      /// fails or is not configured), strips every &lt;code>&amp;lt;SIP:…&amp;gt;&lt;/code> markup from it, and stores the text, the
+      /// configuration and the stage in the intro session, which must not exist yet. Writes no step into the source
+      /// session. Idempotent per (&lt;code>intro_session&lt;/code>, &lt;code>transfer_request_id&lt;/code>): a repeated request
+      /// answers the response of the first one. Answers &lt;code>UNIMPLEMENTED&lt;/code> when the server's warm transfer
+      /// feature is switched off, and &lt;code>FAILED_PRECONDITION&lt;/code> with &lt;code>reason=warm-intro-disabled-for-agent&lt;/code>
+      /// when &lt;code>Agent.warm_transfer_settings.enabled&lt;/code> is false. Requires the permission to run a warm transfer
+      /// intro of the session's project. See &lt;code>docs/warm_transfer.md&lt;/code>.
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
+      /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
+      /// <param name="cancellationToken">An optional token for canceling the call.</param>
+      /// <returns>The call object.</returns>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual grpc::AsyncUnaryCall<global::Google.Cloud.Dialogflow.V2.PrepareWarmTransferIntroResponse> PrepareWarmTransferIntroAsync(global::Google.Cloud.Dialogflow.V2.PrepareWarmTransferIntroRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return PrepareWarmTransferIntroAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      /// <summary>
+      /// Prepares the intro session of a warm transfer: reads the history, the contexts and the slots of the source
+      /// (caller) session, renders the intro text (with an LLM within a time budget, or from the TEMPLATE when the LLM
+      /// fails or is not configured), strips every &lt;code>&amp;lt;SIP:…&amp;gt;&lt;/code> markup from it, and stores the text, the
+      /// configuration and the stage in the intro session, which must not exist yet. Writes no step into the source
+      /// session. Idempotent per (&lt;code>intro_session&lt;/code>, &lt;code>transfer_request_id&lt;/code>): a repeated request
+      /// answers the response of the first one. Answers &lt;code>UNIMPLEMENTED&lt;/code> when the server's warm transfer
+      /// feature is switched off, and &lt;code>FAILED_PRECONDITION&lt;/code> with &lt;code>reason=warm-intro-disabled-for-agent&lt;/code>
+      /// when &lt;code>Agent.warm_transfer_settings.enabled&lt;/code> is false. Requires the permission to run a warm transfer
+      /// intro of the session's project. See &lt;code>docs/warm_transfer.md&lt;/code>.
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="options">The options for the call.</param>
+      /// <returns>The call object.</returns>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual grpc::AsyncUnaryCall<global::Google.Cloud.Dialogflow.V2.PrepareWarmTransferIntroResponse> PrepareWarmTransferIntroAsync(global::Google.Cloud.Dialogflow.V2.PrepareWarmTransferIntroRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.AsyncUnaryCall(__Method_PrepareWarmTransferIntro, null, options, request);
+      }
+      /// <summary>
+      /// Returns the decision the target gave in the intro session of a warm transfer. Never returns the reason text
+      /// or the intro text. Answers &lt;code>UNIMPLEMENTED&lt;/code> when the server's warm transfer feature is switched off.
+      /// Requires the permission to run a warm transfer intro of the session's project.
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
+      /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
+      /// <param name="cancellationToken">An optional token for canceling the call.</param>
+      /// <returns>The response received from the server.</returns>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::Google.Cloud.Dialogflow.V2.WarmTransferIntroOutcome GetWarmTransferIntroOutcome(global::Google.Cloud.Dialogflow.V2.GetWarmTransferIntroOutcomeRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return GetWarmTransferIntroOutcome(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      /// <summary>
+      /// Returns the decision the target gave in the intro session of a warm transfer. Never returns the reason text
+      /// or the intro text. Answers &lt;code>UNIMPLEMENTED&lt;/code> when the server's warm transfer feature is switched off.
+      /// Requires the permission to run a warm transfer intro of the session's project.
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="options">The options for the call.</param>
+      /// <returns>The response received from the server.</returns>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual global::Google.Cloud.Dialogflow.V2.WarmTransferIntroOutcome GetWarmTransferIntroOutcome(global::Google.Cloud.Dialogflow.V2.GetWarmTransferIntroOutcomeRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.BlockingUnaryCall(__Method_GetWarmTransferIntroOutcome, null, options, request);
+      }
+      /// <summary>
+      /// Returns the decision the target gave in the intro session of a warm transfer. Never returns the reason text
+      /// or the intro text. Answers &lt;code>UNIMPLEMENTED&lt;/code> when the server's warm transfer feature is switched off.
+      /// Requires the permission to run a warm transfer intro of the session's project.
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="headers">The initial metadata to send with the call. This parameter is optional.</param>
+      /// <param name="deadline">An optional deadline for the call. The call will be cancelled if deadline is hit.</param>
+      /// <param name="cancellationToken">An optional token for canceling the call.</param>
+      /// <returns>The call object.</returns>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual grpc::AsyncUnaryCall<global::Google.Cloud.Dialogflow.V2.WarmTransferIntroOutcome> GetWarmTransferIntroOutcomeAsync(global::Google.Cloud.Dialogflow.V2.GetWarmTransferIntroOutcomeRequest request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      {
+        return GetWarmTransferIntroOutcomeAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
+      }
+      /// <summary>
+      /// Returns the decision the target gave in the intro session of a warm transfer. Never returns the reason text
+      /// or the intro text. Answers &lt;code>UNIMPLEMENTED&lt;/code> when the server's warm transfer feature is switched off.
+      /// Requires the permission to run a warm transfer intro of the session's project.
+      /// </summary>
+      /// <param name="request">The request to send to the server.</param>
+      /// <param name="options">The options for the call.</param>
+      /// <returns>The call object.</returns>
+      [global::System.CodeDom.Compiler.GeneratedCode("grpc_csharp_plugin", null)]
+      public virtual grpc::AsyncUnaryCall<global::Google.Cloud.Dialogflow.V2.WarmTransferIntroOutcome> GetWarmTransferIntroOutcomeAsync(global::Google.Cloud.Dialogflow.V2.GetWarmTransferIntroOutcomeRequest request, grpc::CallOptions options)
+      {
+        return CallInvoker.AsyncUnaryCall(__Method_GetWarmTransferIntroOutcome, null, options, request);
       }
       /// <summary>
       /// ListSessions: returns list of sessions from ondewo-kb; by default returns only session IDs
@@ -3790,6 +4081,9 @@ namespace Google.Cloud.Dialogflow.V2 {
       return grpc::ServerServiceDefinition.CreateBuilder()
           .AddMethod(__Method_DetectIntent, serviceImpl.DetectIntent)
           .AddMethod(__Method_StreamingDetectIntent, serviceImpl.StreamingDetectIntent)
+          .AddMethod(__Method_InterruptTurn, serviceImpl.InterruptTurn)
+          .AddMethod(__Method_PrepareWarmTransferIntro, serviceImpl.PrepareWarmTransferIntro)
+          .AddMethod(__Method_GetWarmTransferIntroOutcome, serviceImpl.GetWarmTransferIntroOutcome)
           .AddMethod(__Method_ListSessions, serviceImpl.ListSessions)
           .AddMethod(__Method_GetSession, serviceImpl.GetSession)
           .AddMethod(__Method_CreateSession, serviceImpl.CreateSession)
@@ -3849,6 +4143,9 @@ namespace Google.Cloud.Dialogflow.V2 {
     {
       serviceBinder.AddMethod(__Method_DetectIntent, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Google.Cloud.Dialogflow.V2.DetectIntentRequest, global::Google.Cloud.Dialogflow.V2.DetectIntentResponse>(serviceImpl.DetectIntent));
       serviceBinder.AddMethod(__Method_StreamingDetectIntent, serviceImpl == null ? null : new grpc::DuplexStreamingServerMethod<global::Google.Cloud.Dialogflow.V2.StreamingDetectIntentRequest, global::Google.Cloud.Dialogflow.V2.StreamingDetectIntentResponse>(serviceImpl.StreamingDetectIntent));
+      serviceBinder.AddMethod(__Method_InterruptTurn, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Google.Cloud.Dialogflow.V2.InterruptTurnRequest, global::Google.Cloud.Dialogflow.V2.InterruptTurnResponse>(serviceImpl.InterruptTurn));
+      serviceBinder.AddMethod(__Method_PrepareWarmTransferIntro, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Google.Cloud.Dialogflow.V2.PrepareWarmTransferIntroRequest, global::Google.Cloud.Dialogflow.V2.PrepareWarmTransferIntroResponse>(serviceImpl.PrepareWarmTransferIntro));
+      serviceBinder.AddMethod(__Method_GetWarmTransferIntroOutcome, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Google.Cloud.Dialogflow.V2.GetWarmTransferIntroOutcomeRequest, global::Google.Cloud.Dialogflow.V2.WarmTransferIntroOutcome>(serviceImpl.GetWarmTransferIntroOutcome));
       serviceBinder.AddMethod(__Method_ListSessions, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Google.Cloud.Dialogflow.V2.ListSessionsRequest, global::Google.Cloud.Dialogflow.V2.ListSessionsResponse>(serviceImpl.ListSessions));
       serviceBinder.AddMethod(__Method_GetSession, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Google.Cloud.Dialogflow.V2.GetSessionRequest, global::Google.Cloud.Dialogflow.V2.Session>(serviceImpl.GetSession));
       serviceBinder.AddMethod(__Method_CreateSession, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Google.Cloud.Dialogflow.V2.CreateSessionRequest, global::Google.Cloud.Dialogflow.V2.Session>(serviceImpl.CreateSession));

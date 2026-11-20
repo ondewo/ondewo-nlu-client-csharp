@@ -415,8 +415,11 @@ namespace Ondewo.Nlu {
     /// </summary>
     [pbr::OriginalName("CCAI_SERVICE_PROVIDER_MICROSOFT_AZURE_OPENAI")] MicrosoftAzureOpenai = 3,
     /// <summary>
-    /// Microsoft AutoGen as the CCAI service provider
-    /// &lt;a href="https://github.com/microsoft/autogen">AutoGen&lt;/a>
+    /// Deprecated: Microsoft AutoGen as the CCAI service provider
+    /// &lt;a href="https://github.com/microsoft/autogen">AutoGen&lt;/a>.
+    /// The server no longer runs AutoGen and refuses to create services with this provider; stored AutoGen
+    /// services are migrated to AI Teams v2 (LangChain / LangGraph). The value is kept for wire
+    /// compatibility and may still appear on data written before the migration.
     /// </summary>
     [pbr::OriginalName("CCAI_SERVICE_PROVIDER_MICROSOFT_AUTOGEN")] MicrosoftAutogen = 4,
     /// <summary>

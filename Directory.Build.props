@@ -18,8 +18,8 @@
   <PropertyGroup>
     <OndewoPackageId Condition="'$(OndewoPackageId)' == ''">Ondewo.NLU.Client</OndewoPackageId>
     <OndewoTargetFramework Condition="'$(OndewoTargetFramework)' == ''">netstandard2.0</OndewoTargetFramework>
-    <GoogleProtobufVersion Condition="'$(GoogleProtobufVersion)' == ''">3.32.0</GoogleProtobufVersion>
-    <GrpcDotnetVersion Condition="'$(GrpcDotnetVersion)' == ''">2.83.0</GrpcDotnetVersion>
+    <GoogleProtobufVersion Condition="'$(GoogleProtobufVersion)' == ''">3.35.1</GoogleProtobufVersion>
+    <GrpcDotnetVersion Condition="'$(GrpcDotnetVersion)' == ''">2.85.0</GrpcDotnetVersion>
     <GoogleApiCommonProtosVersion Condition="'$(GoogleApiCommonProtosVersion)' == ''">2.17.0</GoogleApiCommonProtosVersion>
   </PropertyGroup>
 

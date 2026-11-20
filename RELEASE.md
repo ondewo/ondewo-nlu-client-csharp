@@ -2,6 +2,15 @@
 
 *****************
 
+## Release ONDEWO NLU Csharp Client 7.6.0
+
+### Improvements
+
+* Tracking API Version [7.6.0](https://github.com/ondewo/ondewo-nlu-api/releases/tag/7.6.0) ( [Documentation](https://ondewo.github.io/ondewo-nlu-api/) )
+* Generated with ondewo-proto-compiler 5.17.0 (protoc 35.1, `grpc_csharp_plugin` from Grpc.Tools 2.85.0). New runtime floors: Google.Protobuf 3.35.1, Grpc.Core.Api / Grpc.Net.Client 2.85.0 and Google.Api.CommonProtos 2.17.0.
+
+*****************
+
 ## Release ONDEWO NLU Csharp Client 7.4.0
 
 ### Improvements

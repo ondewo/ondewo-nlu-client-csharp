@@ -51,99 +51,103 @@ namespace Ondewo.Nlu {
             "cG9uc2USKQoKb3BlcmF0aW9ucxgBIAMoCzIVLm9uZGV3by5ubHUuT3BlcmF0",
             "aW9uEhcKD25leHRfcGFnZV90b2tlbhgCIAEoCSImChZDYW5jZWxPcGVyYXRp",
             "b25SZXF1ZXN0EgwKBG5hbWUYASABKAkiJgoWRGVsZXRlT3BlcmF0aW9uUmVx",
-            "dWVzdBIMCgRuYW1lGAEgASgJIpMBCilTdHJlYW1SZW1vdGVPcGVyYXRpb25D",
+            "dWVzdBIMCgRuYW1lGAEgASgJIrgBCilTdHJlYW1SZW1vdGVPcGVyYXRpb25D",
             "b250YWluZXJMb2dzUmVxdWVzdBIMCgRuYW1lGAEgASgJEi4KDW1pbl9sb2df",
             "bGV2ZWwYAiABKA4yFy5vbmRld28ubmx1LkxvZ1NldmVyaXR5EhIKCnRhaWxf",
-            "bGluZXMYAyABKAUSFAoMY29udGFpbmVyX2lkGAQgASgJIqMCCiZHZXRSZW1v",
-            "dGVPcGVyYXRpb25Db250YWluZXJMb2dzUmVxdWVzdBIMCgRuYW1lGAEgASgJ",
-            "Ei4KDW1pbl9sb2dfbGV2ZWwYAiABKA4yFy5vbmRld28ubmx1LkxvZ1NldmVy",
-            "aXR5Ei4KCnN0YXJ0X3RpbWUYAyABKAsyGi5nb29nbGUucHJvdG9idWYuVGlt",
-            "ZXN0YW1wEiwKCGVuZF90aW1lGAQgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRp",
-            "bWVzdGFtcBIRCgltYXhfbGluZXMYBSABKAUSDQoFcmVnZXgYBiABKAkSFAoM",
-            "Y29udGFpbmVyX2lkGAcgASgJEhIKCmJlZm9yZV9zZXEYCCABKAMSEQoJYWZ0",
-            "ZXJfc2VxGAkgASgDIsoBCidHZXRSZW1vdGVPcGVyYXRpb25Db250YWluZXJM",
-            "b2dzUmVzcG9uc2USPgoJbG9nX2xpbmVzGAEgAygLMisub25kZXdvLm5sdS5S",
-            "ZW1vdGVPcGVyYXRpb25Db250YWluZXJMb2dMaW5lEhEKCXRydW5jYXRlZBgC",
-            "IAEoCBIZChFtaW5fYXZhaWxhYmxlX3NlcRgDIAEoAxIZChFtYXhfYXZhaWxh",
-            "YmxlX3NlcRgEIAEoAxIWCg5oYXNfbW9yZV9vbGRlchgFIAEoCCLEAQofUmVt",
-            "b3RlT3BlcmF0aW9uQ29udGFpbmVyTG9nTGluZRItCgl0aW1lc3RhbXAYASAB",
-            "KAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEiYKBWxldmVsGAIgASgO",
-            "Mhcub25kZXdvLm5sdS5Mb2dTZXZlcml0eRIPCgdtZXNzYWdlGAMgASgJEhQK",
-            "DGNvbnRhaW5lcl9pZBgEIAEoCRIWCg5jb250YWluZXJfbmFtZRgFIAEoCRIL",
-            "CgNzZXEYBiABKAMiTgooR2V0UmVtb3RlT3BlcmF0aW9uQ29udGFpbmVyU3Rh",
-            "dHVzUmVxdWVzdBIMCgRuYW1lGAEgASgJEhQKDGNvbnRhaW5lcl9pZBgCIAEo",
-            "CSK5BQoeUmVtb3RlT3BlcmF0aW9uQ29udGFpbmVyU3RhdHVzEgwKBG5hbWUY",
-            "ASABKAkSSwoPbGlmZWN5Y2xlX3N0YXRlGAIgASgOMjIub25kZXdvLm5sdS5S",
-            "ZW1vdGVPcGVyYXRpb25Db250YWluZXJMaWZlY3ljbGVTdGF0ZRIRCglob3N0",
-            "X25hbWUYAyABKAkSFgoOY29udGFpbmVyX25hbWUYBCABKAkSFAoMY29udGFp",
-            "bmVyX2lkGAsgASgJEhEKCWV4aXRfY29kZRgFIAEoBRISCgpvb21fa2lsbGVk",
-            "GAYgASgIEhUKDWhlYWx0aF9zdGF0dXMYByABKAkSLgoKc3RhcnRlZF9hdBgI",
-            "IAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASLwoLZmluaXNoZWRf",
-            "YXQYCSABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEi8KC29ic2Vy",
-            "dmVkX2F0GAogASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBJjChVl",
-            "bnZpcm9ubWVudF92YXJpYWJsZXMYDCADKAsyRC5vbmRld28ubmx1LlJlbW90",
-            "ZU9wZXJhdGlvbkNvbnRhaW5lclN0YXR1cy5FbnZpcm9ubWVudFZhcmlhYmxl",
-            "c0VudHJ5Eg8KB2NvbW1hbmQYDSADKAkSGgoSbWVtb3J5X2xpbWl0X2J5dGVz",
-            "GA4gASgDEhEKCW5hbm9fY3B1cxgPIAEoAxITCgtjcHVzZXRfY3B1cxgQIAEo",
-            "CRIRCgljcHVfcXVvdGEYESABKAMSEgoKY3B1X3BlcmlvZBgSIAEoAxINCgVp",
-            "bWFnZRgTIAEoCRo7ChlFbnZpcm9ubWVudFZhcmlhYmxlc0VudHJ5EgsKA2tl",
-            "eRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAEilgUKGFJlbW90ZU9wZXJhdGlv",
-            "bkNvbnRhaW5lchIUCgxjb250YWluZXJfaWQYASABKAkSFgoOY29udGFpbmVy",
-            "X25hbWUYAiABKAkSEQoJaG9zdF9uYW1lGAMgASgJEksKD2xpZmVjeWNsZV9z",
-            "dGF0ZRgEIAEoDjIyLm9uZGV3by5ubHUuUmVtb3RlT3BlcmF0aW9uQ29udGFp",
-            "bmVyTGlmZWN5Y2xlU3RhdGUSFgoOb3BlcmF0aW9uX25hbWUYBSABKAkSDQoF",
-            "aW1hZ2UYBiABKAkSDQoFcGhhc2UYByABKAkSEQoJZXhpdF9jb2RlGAggASgF",
-            "EhIKCm9vbV9raWxsZWQYCSABKAgSLgoKc3RhcnRlZF9hdBgKIAEoCzIaLmdv",
-            "b2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASLwoLZmluaXNoZWRfYXQYCyABKAsy",
-            "Gi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEhYKDmxvZ3NfYXZhaWxhYmxl",
-            "GAwgASgIEl0KFWVudmlyb25tZW50X3ZhcmlhYmxlcxgNIAMoCzI+Lm9uZGV3",
-            "by5ubHUuUmVtb3RlT3BlcmF0aW9uQ29udGFpbmVyLkVudmlyb25tZW50VmFy",
-            "aWFibGVzRW50cnkSDwoHY29tbWFuZBgOIAMoCRIaChJtZW1vcnlfbGltaXRf",
-            "Ynl0ZXMYDyABKAMSEQoJbmFub19jcHVzGBAgASgDEhMKC2NwdXNldF9jcHVz",
-            "GBEgASgJEhEKCWNwdV9xdW90YRgSIAEoAxISCgpjcHVfcGVyaW9kGBMgASgD",
-            "GjsKGUVudmlyb25tZW50VmFyaWFibGVzRW50cnkSCwoDa2V5GAEgASgJEg0K",
-            "BXZhbHVlGAIgASgJOgI4ASJUCiRMaXN0UmVtb3RlT3BlcmF0aW9uQ29udGFp",
-            "bmVyc1JlcXVlc3QSDAoEbmFtZRgBIAEoCRIeChZpbmNsdWRlX3N1Yl9vcGVy",
-            "YXRpb25zGAIgASgIImEKJUxpc3RSZW1vdGVPcGVyYXRpb25Db250YWluZXJz",
-            "UmVzcG9uc2USOAoKY29udGFpbmVycxgBIAMoCzIkLm9uZGV3by5ubHUuUmVt",
-            "b3RlT3BlcmF0aW9uQ29udGFpbmVyKuwDCiZSZW1vdGVPcGVyYXRpb25Db250",
-            "YWluZXJMaWZlY3ljbGVTdGF0ZRI6CjZSRU1PVEVfT1BFUkFUSU9OX0NPTlRB",
-            "SU5FUl9MSUZFQ1lDTEVfU1RBVEVfVU5TUEVDSUZJRUQQABI4CjRSRU1PVEVf",
-            "T1BFUkFUSU9OX0NPTlRBSU5FUl9MSUZFQ1lDTEVfU1RBVEVfTk9UX0ZPVU5E",
-            "EAESNgoyUkVNT1RFX09QRVJBVElPTl9DT05UQUlORVJfTElGRUNZQ0xFX1NU",
-            "QVRFX0NSRUFURUQQAhI2CjJSRU1PVEVfT1BFUkFUSU9OX0NPTlRBSU5FUl9M",
-            "SUZFQ1lDTEVfU1RBVEVfUlVOTklORxADEjUKMVJFTU9URV9PUEVSQVRJT05f",
-            "Q09OVEFJTkVSX0xJRkVDWUNMRV9TVEFURV9QQVVTRUQQBBI5CjVSRU1PVEVf",
-            "T1BFUkFUSU9OX0NPTlRBSU5FUl9MSUZFQ1lDTEVfU1RBVEVfUkVTVEFSVElO",
-            "RxAFEjUKMVJFTU9URV9PUEVSQVRJT05fQ09OVEFJTkVSX0xJRkVDWUNMRV9T",
-            "VEFURV9FWElURUQQBhIzCi9SRU1PVEVfT1BFUkFUSU9OX0NPTlRBSU5FUl9M",
-            "SUZFQ1lDTEVfU1RBVEVfREVBRBAHMpIJCgpPcGVyYXRpb25zEnYKDkxpc3RP",
-            "cGVyYXRpb25zEiEub25kZXdvLm5sdS5MaXN0T3BlcmF0aW9uc1JlcXVlc3Qa",
-            "Ii5vbmRld28ubmx1Lkxpc3RPcGVyYXRpb25zUmVzcG9uc2UiHYLT5JMCFxIV",
-            "L3YxL3tuYW1lPW9wZXJhdGlvbnN9EmgKDEdldE9wZXJhdGlvbhIfLm9uZGV3",
-            "by5ubHUuR2V0T3BlcmF0aW9uUmVxdWVzdBoVLm9uZGV3by5ubHUuT3BlcmF0",
-            "aW9uIiCC0+STAhoSGC92MS97bmFtZT1vcGVyYXRpb25zLyoqfRJvCg9EZWxl",
-            "dGVPcGVyYXRpb24SIi5vbmRld28ubmx1LkRlbGV0ZU9wZXJhdGlvblJlcXVl",
-            "c3QaFi5nb29nbGUucHJvdG9idWYuRW1wdHkiIILT5JMCGioYL3YxL3tuYW1l",
-            "PW9wZXJhdGlvbnMvKip9EnkKD0NhbmNlbE9wZXJhdGlvbhIiLm9uZGV3by5u",
-            "bHUuQ2FuY2VsT3BlcmF0aW9uUmVxdWVzdBoWLmdvb2dsZS5wcm90b2J1Zi5F",
-            "bXB0eSIqgtPkkwIkIh8vdjEve25hbWU9b3BlcmF0aW9ucy8qKn06Y2FuY2Vs",
-            "OgEqEooBCiJTdHJlYW1SZW1vdGVPcGVyYXRpb25Db250YWluZXJMb2dzEjUu",
-            "b25kZXdvLm5sdS5TdHJlYW1SZW1vdGVPcGVyYXRpb25Db250YWluZXJMb2dz",
-            "UmVxdWVzdBorLm9uZGV3by5ubHUuUmVtb3RlT3BlcmF0aW9uQ29udGFpbmVy",
-            "TG9nTGluZTABEroBCh9HZXRSZW1vdGVPcGVyYXRpb25Db250YWluZXJMb2dz",
-            "EjIub25kZXdvLm5sdS5HZXRSZW1vdGVPcGVyYXRpb25Db250YWluZXJMb2dz",
-            "UmVxdWVzdBozLm9uZGV3by5ubHUuR2V0UmVtb3RlT3BlcmF0aW9uQ29udGFp",
-            "bmVyTG9nc1Jlc3BvbnNlIi6C0+STAigSJi92MS97bmFtZT1vcGVyYXRpb25z",
-            "LyoqfTpjb250YWluZXJMb2dzErcBCiFHZXRSZW1vdGVPcGVyYXRpb25Db250",
-            "YWluZXJTdGF0dXMSNC5vbmRld28ubmx1LkdldFJlbW90ZU9wZXJhdGlvbkNv",
-            "bnRhaW5lclN0YXR1c1JlcXVlc3QaKi5vbmRld28ubmx1LlJlbW90ZU9wZXJh",
-            "dGlvbkNvbnRhaW5lclN0YXR1cyIwgtPkkwIqEigvdjEve25hbWU9b3BlcmF0",
-            "aW9ucy8qKn06Y29udGFpbmVyU3RhdHVzErEBCh1MaXN0UmVtb3RlT3BlcmF0",
-            "aW9uQ29udGFpbmVycxIwLm9uZGV3by5ubHUuTGlzdFJlbW90ZU9wZXJhdGlv",
-            "bkNvbnRhaW5lcnNSZXF1ZXN0GjEub25kZXdvLm5sdS5MaXN0UmVtb3RlT3Bl",
-            "cmF0aW9uQ29udGFpbmVyc1Jlc3BvbnNlIiuC0+STAiUSIy92MS97bmFtZT1v",
-            "cGVyYXRpb25zLyoqfTpjb250YWluZXJzYgZwcm90bzM="));
+            "bGluZXMYAyABKAUSFAoMY29udGFpbmVyX2lkGAQgASgJEg0KBXJlZ2V4GAUg",
+            "ASgJEhQKDHJlc3VtZV90b2tlbhgGIAEoCSLpAgomR2V0UmVtb3RlT3BlcmF0",
+            "aW9uQ29udGFpbmVyTG9nc1JlcXVlc3QSDAoEbmFtZRgBIAEoCRIuCg1taW5f",
+            "bG9nX2xldmVsGAIgASgOMhcub25kZXdvLm5sdS5Mb2dTZXZlcml0eRIuCgpz",
+            "dGFydF90aW1lGAMgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIs",
+            "CghlbmRfdGltZRgEIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAS",
+            "EQoJbWF4X2xpbmVzGAUgASgFEg0KBXJlZ2V4GAYgASgJEhQKDGNvbnRhaW5l",
+            "cl9pZBgHIAEoCRISCgpiZWZvcmVfc2VxGAggASgDEhEKCWFmdGVyX3NlcRgJ",
+            "IAEoAxIuCgpmaWVsZF9tYXNrGAogASgLMhouZ29vZ2xlLnByb3RvYnVmLkZp",
+            "ZWxkTWFzaxIUCgxyZXN1bWVfdG9rZW4YCyABKAki/QEKJ0dldFJlbW90ZU9w",
+            "ZXJhdGlvbkNvbnRhaW5lckxvZ3NSZXNwb25zZRI+Cglsb2dfbGluZXMYASAD",
+            "KAsyKy5vbmRld28ubmx1LlJlbW90ZU9wZXJhdGlvbkNvbnRhaW5lckxvZ0xp",
+            "bmUSEQoJdHJ1bmNhdGVkGAIgASgIEhkKEW1pbl9hdmFpbGFibGVfc2VxGAMg",
+            "ASgDEhkKEW1heF9hdmFpbGFibGVfc2VxGAQgASgDEhYKDmhhc19tb3JlX29s",
+            "ZGVyGAUgASgIEhkKEW5leHRfcmVzdW1lX3Rva2VuGAYgASgJEhYKDmhhc19t",
+            "b3JlX25ld2VyGAcgASgIItgBCh9SZW1vdGVPcGVyYXRpb25Db250YWluZXJM",
+            "b2dMaW5lEi0KCXRpbWVzdGFtcBgBIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5U",
+            "aW1lc3RhbXASJgoFbGV2ZWwYAiABKA4yFy5vbmRld28ubmx1LkxvZ1NldmVy",
+            "aXR5Eg8KB21lc3NhZ2UYAyABKAkSFAoMY29udGFpbmVyX2lkGAQgASgJEhYK",
+            "DmNvbnRhaW5lcl9uYW1lGAUgASgJEgsKA3NlcRgGIAEoAxISCgpsb2dfc3Ry",
+            "ZWFtGAcgASgJIk4KKEdldFJlbW90ZU9wZXJhdGlvbkNvbnRhaW5lclN0YXR1",
+            "c1JlcXVlc3QSDAoEbmFtZRgBIAEoCRIUCgxjb250YWluZXJfaWQYAiABKAki",
+            "uQUKHlJlbW90ZU9wZXJhdGlvbkNvbnRhaW5lclN0YXR1cxIMCgRuYW1lGAEg",
+            "ASgJEksKD2xpZmVjeWNsZV9zdGF0ZRgCIAEoDjIyLm9uZGV3by5ubHUuUmVt",
+            "b3RlT3BlcmF0aW9uQ29udGFpbmVyTGlmZWN5Y2xlU3RhdGUSEQoJaG9zdF9u",
+            "YW1lGAMgASgJEhYKDmNvbnRhaW5lcl9uYW1lGAQgASgJEhQKDGNvbnRhaW5l",
+            "cl9pZBgLIAEoCRIRCglleGl0X2NvZGUYBSABKAUSEgoKb29tX2tpbGxlZBgG",
+            "IAEoCBIVCg1oZWFsdGhfc3RhdHVzGAcgASgJEi4KCnN0YXJ0ZWRfYXQYCCAB",
+            "KAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wEi8KC2ZpbmlzaGVkX2F0",
+            "GAkgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIvCgtvYnNlcnZl",
+            "ZF9hdBgKIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXASYwoVZW52",
+            "aXJvbm1lbnRfdmFyaWFibGVzGAwgAygLMkQub25kZXdvLm5sdS5SZW1vdGVP",
+            "cGVyYXRpb25Db250YWluZXJTdGF0dXMuRW52aXJvbm1lbnRWYXJpYWJsZXNF",
+            "bnRyeRIPCgdjb21tYW5kGA0gAygJEhoKEm1lbW9yeV9saW1pdF9ieXRlcxgO",
+            "IAEoAxIRCgluYW5vX2NwdXMYDyABKAMSEwoLY3B1c2V0X2NwdXMYECABKAkS",
+            "EQoJY3B1X3F1b3RhGBEgASgDEhIKCmNwdV9wZXJpb2QYEiABKAMSDQoFaW1h",
+            "Z2UYEyABKAkaOwoZRW52aXJvbm1lbnRWYXJpYWJsZXNFbnRyeRILCgNrZXkY",
+            "ASABKAkSDQoFdmFsdWUYAiABKAk6AjgBIpYFChhSZW1vdGVPcGVyYXRpb25D",
+            "b250YWluZXISFAoMY29udGFpbmVyX2lkGAEgASgJEhYKDmNvbnRhaW5lcl9u",
+            "YW1lGAIgASgJEhEKCWhvc3RfbmFtZRgDIAEoCRJLCg9saWZlY3ljbGVfc3Rh",
+            "dGUYBCABKA4yMi5vbmRld28ubmx1LlJlbW90ZU9wZXJhdGlvbkNvbnRhaW5l",
+            "ckxpZmVjeWNsZVN0YXRlEhYKDm9wZXJhdGlvbl9uYW1lGAUgASgJEg0KBWlt",
+            "YWdlGAYgASgJEg0KBXBoYXNlGAcgASgJEhEKCWV4aXRfY29kZRgIIAEoBRIS",
+            "Cgpvb21fa2lsbGVkGAkgASgIEi4KCnN0YXJ0ZWRfYXQYCiABKAsyGi5nb29n",
+            "bGUucHJvdG9idWYuVGltZXN0YW1wEi8KC2ZpbmlzaGVkX2F0GAsgASgLMhou",
+            "Z29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcBIWCg5sb2dzX2F2YWlsYWJsZRgM",
+            "IAEoCBJdChVlbnZpcm9ubWVudF92YXJpYWJsZXMYDSADKAsyPi5vbmRld28u",
+            "bmx1LlJlbW90ZU9wZXJhdGlvbkNvbnRhaW5lci5FbnZpcm9ubWVudFZhcmlh",
+            "Ymxlc0VudHJ5Eg8KB2NvbW1hbmQYDiADKAkSGgoSbWVtb3J5X2xpbWl0X2J5",
+            "dGVzGA8gASgDEhEKCW5hbm9fY3B1cxgQIAEoAxITCgtjcHVzZXRfY3B1cxgR",
+            "IAEoCRIRCgljcHVfcXVvdGEYEiABKAMSEgoKY3B1X3BlcmlvZBgTIAEoAxo7",
+            "ChlFbnZpcm9ubWVudFZhcmlhYmxlc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2",
+            "YWx1ZRgCIAEoCToCOAEiVAokTGlzdFJlbW90ZU9wZXJhdGlvbkNvbnRhaW5l",
+            "cnNSZXF1ZXN0EgwKBG5hbWUYASABKAkSHgoWaW5jbHVkZV9zdWJfb3BlcmF0",
+            "aW9ucxgCIAEoCCJhCiVMaXN0UmVtb3RlT3BlcmF0aW9uQ29udGFpbmVyc1Jl",
+            "c3BvbnNlEjgKCmNvbnRhaW5lcnMYASADKAsyJC5vbmRld28ubmx1LlJlbW90",
+            "ZU9wZXJhdGlvbkNvbnRhaW5lcirsAwomUmVtb3RlT3BlcmF0aW9uQ29udGFp",
+            "bmVyTGlmZWN5Y2xlU3RhdGUSOgo2UkVNT1RFX09QRVJBVElPTl9DT05UQUlO",
+            "RVJfTElGRUNZQ0xFX1NUQVRFX1VOU1BFQ0lGSUVEEAASOAo0UkVNT1RFX09Q",
+            "RVJBVElPTl9DT05UQUlORVJfTElGRUNZQ0xFX1NUQVRFX05PVF9GT1VORBAB",
+            "EjYKMlJFTU9URV9PUEVSQVRJT05fQ09OVEFJTkVSX0xJRkVDWUNMRV9TVEFU",
+            "RV9DUkVBVEVEEAISNgoyUkVNT1RFX09QRVJBVElPTl9DT05UQUlORVJfTElG",
+            "RUNZQ0xFX1NUQVRFX1JVTk5JTkcQAxI1CjFSRU1PVEVfT1BFUkFUSU9OX0NP",
+            "TlRBSU5FUl9MSUZFQ1lDTEVfU1RBVEVfUEFVU0VEEAQSOQo1UkVNT1RFX09Q",
+            "RVJBVElPTl9DT05UQUlORVJfTElGRUNZQ0xFX1NUQVRFX1JFU1RBUlRJTkcQ",
+            "BRI1CjFSRU1PVEVfT1BFUkFUSU9OX0NPTlRBSU5FUl9MSUZFQ1lDTEVfU1RB",
+            "VEVfRVhJVEVEEAYSMwovUkVNT1RFX09QRVJBVElPTl9DT05UQUlORVJfTElG",
+            "RUNZQ0xFX1NUQVRFX0RFQUQQBzKSCQoKT3BlcmF0aW9ucxJ2Cg5MaXN0T3Bl",
+            "cmF0aW9ucxIhLm9uZGV3by5ubHUuTGlzdE9wZXJhdGlvbnNSZXF1ZXN0GiIu",
+            "b25kZXdvLm5sdS5MaXN0T3BlcmF0aW9uc1Jlc3BvbnNlIh2C0+STAhcSFS92",
+            "MS97bmFtZT1vcGVyYXRpb25zfRJoCgxHZXRPcGVyYXRpb24SHy5vbmRld28u",
+            "bmx1LkdldE9wZXJhdGlvblJlcXVlc3QaFS5vbmRld28ubmx1Lk9wZXJhdGlv",
+            "biIggtPkkwIaEhgvdjEve25hbWU9b3BlcmF0aW9ucy8qKn0SbwoPRGVsZXRl",
+            "T3BlcmF0aW9uEiIub25kZXdvLm5sdS5EZWxldGVPcGVyYXRpb25SZXF1ZXN0",
+            "GhYuZ29vZ2xlLnByb3RvYnVmLkVtcHR5IiCC0+STAhoqGC92MS97bmFtZT1v",
+            "cGVyYXRpb25zLyoqfRJ5Cg9DYW5jZWxPcGVyYXRpb24SIi5vbmRld28ubmx1",
+            "LkNhbmNlbE9wZXJhdGlvblJlcXVlc3QaFi5nb29nbGUucHJvdG9idWYuRW1w",
+            "dHkiKoLT5JMCJCIfL3YxL3tuYW1lPW9wZXJhdGlvbnMvKip9OmNhbmNlbDoB",
+            "KhKKAQoiU3RyZWFtUmVtb3RlT3BlcmF0aW9uQ29udGFpbmVyTG9ncxI1Lm9u",
+            "ZGV3by5ubHUuU3RyZWFtUmVtb3RlT3BlcmF0aW9uQ29udGFpbmVyTG9nc1Jl",
+            "cXVlc3QaKy5vbmRld28ubmx1LlJlbW90ZU9wZXJhdGlvbkNvbnRhaW5lckxv",
+            "Z0xpbmUwARK6AQofR2V0UmVtb3RlT3BlcmF0aW9uQ29udGFpbmVyTG9ncxIy",
+            "Lm9uZGV3by5ubHUuR2V0UmVtb3RlT3BlcmF0aW9uQ29udGFpbmVyTG9nc1Jl",
+            "cXVlc3QaMy5vbmRld28ubmx1LkdldFJlbW90ZU9wZXJhdGlvbkNvbnRhaW5l",
+            "ckxvZ3NSZXNwb25zZSIugtPkkwIoEiYvdjEve25hbWU9b3BlcmF0aW9ucy8q",
+            "Kn06Y29udGFpbmVyTG9ncxK3AQohR2V0UmVtb3RlT3BlcmF0aW9uQ29udGFp",
+            "bmVyU3RhdHVzEjQub25kZXdvLm5sdS5HZXRSZW1vdGVPcGVyYXRpb25Db250",
+            "YWluZXJTdGF0dXNSZXF1ZXN0Gioub25kZXdvLm5sdS5SZW1vdGVPcGVyYXRp",
+            "b25Db250YWluZXJTdGF0dXMiMILT5JMCKhIoL3YxL3tuYW1lPW9wZXJhdGlv",
+            "bnMvKip9OmNvbnRhaW5lclN0YXR1cxKxAQodTGlzdFJlbW90ZU9wZXJhdGlv",
+            "bkNvbnRhaW5lcnMSMC5vbmRld28ubmx1Lkxpc3RSZW1vdGVPcGVyYXRpb25D",
+            "b250YWluZXJzUmVxdWVzdBoxLm9uZGV3by5ubHUuTGlzdFJlbW90ZU9wZXJh",
+            "dGlvbkNvbnRhaW5lcnNSZXNwb25zZSIrgtPkkwIlEiMvdjEve25hbWU9b3Bl",
+            "cmF0aW9ucy8qKn06Y29udGFpbmVyc2IGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Google.Api.AnnotationsReflection.Descriptor, global::Google.Protobuf.WellKnownTypes.AnyReflection.Descriptor, global::Google.Protobuf.WellKnownTypes.EmptyReflection.Descriptor, global::Google.Protobuf.WellKnownTypes.FieldMaskReflection.Descriptor, global::Google.Rpc.StatusReflection.Descriptor, global::Google.Protobuf.WellKnownTypes.TimestampReflection.Descriptor, global::Ondewo.Nlu.OperationMetadataReflection.Descriptor, global::Google.Cloud.Dialogflow.V2.CommonReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Ondewo.Nlu.RemoteOperationContainerLifecycleState), }, null, new pbr::GeneratedClrTypeInfo[] {
@@ -154,10 +158,10 @@ namespace Ondewo.Nlu {
             new pbr::GeneratedClrTypeInfo(typeof(global::Ondewo.Nlu.ListOperationsResponse), global::Ondewo.Nlu.ListOperationsResponse.Parser, new[]{ "Operations", "NextPageToken" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Ondewo.Nlu.CancelOperationRequest), global::Ondewo.Nlu.CancelOperationRequest.Parser, new[]{ "Name" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Ondewo.Nlu.DeleteOperationRequest), global::Ondewo.Nlu.DeleteOperationRequest.Parser, new[]{ "Name" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Ondewo.Nlu.StreamRemoteOperationContainerLogsRequest), global::Ondewo.Nlu.StreamRemoteOperationContainerLogsRequest.Parser, new[]{ "Name", "MinLogLevel", "TailLines", "ContainerId" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Ondewo.Nlu.GetRemoteOperationContainerLogsRequest), global::Ondewo.Nlu.GetRemoteOperationContainerLogsRequest.Parser, new[]{ "Name", "MinLogLevel", "StartTime", "EndTime", "MaxLines", "Regex", "ContainerId", "BeforeSeq", "AfterSeq" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Ondewo.Nlu.GetRemoteOperationContainerLogsResponse), global::Ondewo.Nlu.GetRemoteOperationContainerLogsResponse.Parser, new[]{ "LogLines", "Truncated", "MinAvailableSeq", "MaxAvailableSeq", "HasMoreOlder" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Ondewo.Nlu.RemoteOperationContainerLogLine), global::Ondewo.Nlu.RemoteOperationContainerLogLine.Parser, new[]{ "Timestamp", "Level", "Message", "ContainerId", "ContainerName", "Seq" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Ondewo.Nlu.StreamRemoteOperationContainerLogsRequest), global::Ondewo.Nlu.StreamRemoteOperationContainerLogsRequest.Parser, new[]{ "Name", "MinLogLevel", "TailLines", "ContainerId", "Regex", "ResumeToken" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Ondewo.Nlu.GetRemoteOperationContainerLogsRequest), global::Ondewo.Nlu.GetRemoteOperationContainerLogsRequest.Parser, new[]{ "Name", "MinLogLevel", "StartTime", "EndTime", "MaxLines", "Regex", "ContainerId", "BeforeSeq", "AfterSeq", "FieldMask", "ResumeToken" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Ondewo.Nlu.GetRemoteOperationContainerLogsResponse), global::Ondewo.Nlu.GetRemoteOperationContainerLogsResponse.Parser, new[]{ "LogLines", "Truncated", "MinAvailableSeq", "MaxAvailableSeq", "HasMoreOlder", "NextResumeToken", "HasMoreNewer" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Ondewo.Nlu.RemoteOperationContainerLogLine), global::Ondewo.Nlu.RemoteOperationContainerLogLine.Parser, new[]{ "Timestamp", "Level", "Message", "ContainerId", "ContainerName", "Seq", "LogStream" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Ondewo.Nlu.GetRemoteOperationContainerStatusRequest), global::Ondewo.Nlu.GetRemoteOperationContainerStatusRequest.Parser, new[]{ "Name", "ContainerId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Ondewo.Nlu.RemoteOperationContainerStatus), global::Ondewo.Nlu.RemoteOperationContainerStatus.Parser, new[]{ "Name", "LifecycleState", "HostName", "ContainerName", "ContainerId", "ExitCode", "OomKilled", "HealthStatus", "StartedAt", "FinishedAt", "ObservedAt", "EnvironmentVariables", "Command", "MemoryLimitBytes", "NanoCpus", "CpusetCpus", "CpuQuota", "CpuPeriod", "Image" }, null, null, null, new pbr::GeneratedClrTypeInfo[] { null, }),
             new pbr::GeneratedClrTypeInfo(typeof(global::Ondewo.Nlu.RemoteOperationContainer), global::Ondewo.Nlu.RemoteOperationContainer.Parser, new[]{ "ContainerId", "ContainerName", "HostName", "LifecycleState", "OperationName", "Image", "Phase", "ExitCode", "OomKilled", "StartedAt", "FinishedAt", "LogsAvailable", "EnvironmentVariables", "Command", "MemoryLimitBytes", "NanoCpus", "CpusetCpus", "CpuQuota", "CpuPeriod" }, null, null, null, new pbr::GeneratedClrTypeInfo[] { null, }),
@@ -2497,6 +2501,8 @@ namespace Ondewo.Nlu {
       minLogLevel_ = other.minLogLevel_;
       tailLines_ = other.tailLines_;
       containerId_ = other.containerId_;
+      regex_ = other.regex_;
+      resumeToken_ = other.resumeToken_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -2571,6 +2577,41 @@ namespace Ondewo.Nlu {
       }
     }
 
+    /// <summary>Field number for the "regex" field.</summary>
+    public const int RegexFieldNumber = 5;
+    private string regex_ = "";
+    /// <summary>
+    /// Optional. Only stream lines whose message matches this regular expression (Python &lt;code>re&lt;/code> syntax,
+    /// at most 512 characters). Empty (the default) disables regex filtering. An invalid, oversized or
+    /// catastrophically backtracking pattern is rejected with &lt;code>INVALID_ARGUMENT&lt;/code>.
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string Regex {
+      get { return regex_; }
+      set {
+        regex_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "resume_token" field.</summary>
+    public const int ResumeTokenFieldNumber = 6;
+    private string resumeToken_ = "";
+    /// <summary>
+    /// Optional. Resume exactly where a previous stream or &lt;code>GetRemoteOperationContainerLogs&lt;/code> page
+    /// stopped: the &lt;code>next_resume_token&lt;/code> of that response, echoed back verbatim. When set, no
+    /// historical replay is applied and &lt;code>tail_lines&lt;/code> is ignored. The token is interchangeable with
+    /// &lt;code>Logs.StreamLogs&lt;/code> / &lt;code>Logs.ListLogs&lt;/code> tokens.
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string ResumeToken {
+      get { return resumeToken_; }
+      set {
+        resumeToken_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -2590,6 +2631,8 @@ namespace Ondewo.Nlu {
       if (MinLogLevel != other.MinLogLevel) return false;
       if (TailLines != other.TailLines) return false;
       if (ContainerId != other.ContainerId) return false;
+      if (Regex != other.Regex) return false;
+      if (ResumeToken != other.ResumeToken) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -2601,6 +2644,8 @@ namespace Ondewo.Nlu {
       if (MinLogLevel != global::Google.Cloud.Dialogflow.V2.LogSeverity.Unspecified) hash ^= MinLogLevel.GetHashCode();
       if (TailLines != 0) hash ^= TailLines.GetHashCode();
       if (ContainerId.Length != 0) hash ^= ContainerId.GetHashCode();
+      if (Regex.Length != 0) hash ^= Regex.GetHashCode();
+      if (ResumeToken.Length != 0) hash ^= ResumeToken.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -2635,6 +2680,14 @@ namespace Ondewo.Nlu {
         output.WriteRawTag(34);
         output.WriteString(ContainerId);
       }
+      if (Regex.Length != 0) {
+        output.WriteRawTag(42);
+        output.WriteString(Regex);
+      }
+      if (ResumeToken.Length != 0) {
+        output.WriteRawTag(50);
+        output.WriteString(ResumeToken);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -2661,6 +2714,14 @@ namespace Ondewo.Nlu {
         output.WriteRawTag(34);
         output.WriteString(ContainerId);
       }
+      if (Regex.Length != 0) {
+        output.WriteRawTag(42);
+        output.WriteString(Regex);
+      }
+      if (ResumeToken.Length != 0) {
+        output.WriteRawTag(50);
+        output.WriteString(ResumeToken);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -2682,6 +2743,12 @@ namespace Ondewo.Nlu {
       }
       if (ContainerId.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(ContainerId);
+      }
+      if (Regex.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Regex);
+      }
+      if (ResumeToken.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(ResumeToken);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -2706,6 +2773,12 @@ namespace Ondewo.Nlu {
       }
       if (other.ContainerId.Length != 0) {
         ContainerId = other.ContainerId;
+      }
+      if (other.Regex.Length != 0) {
+        Regex = other.Regex;
+      }
+      if (other.ResumeToken.Length != 0) {
+        ResumeToken = other.ResumeToken;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -2742,6 +2815,14 @@ namespace Ondewo.Nlu {
             ContainerId = input.ReadString();
             break;
           }
+          case 42: {
+            Regex = input.ReadString();
+            break;
+          }
+          case 50: {
+            ResumeToken = input.ReadString();
+            break;
+          }
         }
       }
     #endif
@@ -2775,6 +2856,14 @@ namespace Ondewo.Nlu {
           }
           case 34: {
             ContainerId = input.ReadString();
+            break;
+          }
+          case 42: {
+            Regex = input.ReadString();
+            break;
+          }
+          case 50: {
+            ResumeToken = input.ReadString();
             break;
           }
         }
@@ -2831,6 +2920,8 @@ namespace Ondewo.Nlu {
       containerId_ = other.containerId_;
       beforeSeq_ = other.beforeSeq_;
       afterSeq_ = other.afterSeq_;
+      fieldMask_ = other.fieldMask_ != null ? other.fieldMask_.Clone() : null;
+      resumeToken_ = other.resumeToken_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -2986,6 +3077,41 @@ namespace Ondewo.Nlu {
       }
     }
 
+    /// <summary>Field number for the "field_mask" field.</summary>
+    public const int FieldMaskFieldNumber = 10;
+    private global::Google.Protobuf.WellKnownTypes.FieldMask fieldMask_;
+    /// <summary>
+    /// Optional. Partial response: the field paths to populate in every returned
+    /// &lt;code>RemoteOperationContainerLogLine&lt;/code>, relative to that message (no &lt;code>log_lines.&lt;/code>
+    /// prefix). &lt;code>seq&lt;/code> and &lt;code>log_stream&lt;/code> are always populated. Unset or empty returns every
+    /// field. An unknown path is rejected with &lt;code>INVALID_ARGUMENT&lt;/code> naming it.
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::Google.Protobuf.WellKnownTypes.FieldMask FieldMask {
+      get { return fieldMask_; }
+      set {
+        fieldMask_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "resume_token" field.</summary>
+    public const int ResumeTokenFieldNumber = 11;
+    private string resumeToken_ = "";
+    /// <summary>
+    /// Optional. An opaque cursor from a previous response&amp;apos;s &lt;code>next_resume_token&lt;/code>. Use it instead of
+    /// &lt;code>after_seq&lt;/code> / &lt;code>before_seq&lt;/code> when the operation ran several containers. Cannot be
+    /// combined with &lt;code>before_seq&lt;/code> or &lt;code>after_seq&lt;/code>.
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string ResumeToken {
+      get { return resumeToken_; }
+      set {
+        resumeToken_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -3010,6 +3136,8 @@ namespace Ondewo.Nlu {
       if (ContainerId != other.ContainerId) return false;
       if (BeforeSeq != other.BeforeSeq) return false;
       if (AfterSeq != other.AfterSeq) return false;
+      if (!object.Equals(FieldMask, other.FieldMask)) return false;
+      if (ResumeToken != other.ResumeToken) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -3026,6 +3154,8 @@ namespace Ondewo.Nlu {
       if (ContainerId.Length != 0) hash ^= ContainerId.GetHashCode();
       if (BeforeSeq != 0L) hash ^= BeforeSeq.GetHashCode();
       if (AfterSeq != 0L) hash ^= AfterSeq.GetHashCode();
+      if (fieldMask_ != null) hash ^= FieldMask.GetHashCode();
+      if (ResumeToken.Length != 0) hash ^= ResumeToken.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -3080,6 +3210,14 @@ namespace Ondewo.Nlu {
         output.WriteRawTag(72);
         output.WriteInt64(AfterSeq);
       }
+      if (fieldMask_ != null) {
+        output.WriteRawTag(82);
+        output.WriteMessage(FieldMask);
+      }
+      if (ResumeToken.Length != 0) {
+        output.WriteRawTag(90);
+        output.WriteString(ResumeToken);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -3126,6 +3264,14 @@ namespace Ondewo.Nlu {
         output.WriteRawTag(72);
         output.WriteInt64(AfterSeq);
       }
+      if (fieldMask_ != null) {
+        output.WriteRawTag(82);
+        output.WriteMessage(FieldMask);
+      }
+      if (ResumeToken.Length != 0) {
+        output.WriteRawTag(90);
+        output.WriteString(ResumeToken);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -3162,6 +3308,12 @@ namespace Ondewo.Nlu {
       }
       if (AfterSeq != 0L) {
         size += 1 + pb::CodedOutputStream.ComputeInt64Size(AfterSeq);
+      }
+      if (fieldMask_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(FieldMask);
+      }
+      if (ResumeToken.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(ResumeToken);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -3207,6 +3359,15 @@ namespace Ondewo.Nlu {
       }
       if (other.AfterSeq != 0L) {
         AfterSeq = other.AfterSeq;
+      }
+      if (other.fieldMask_ != null) {
+        if (fieldMask_ == null) {
+          FieldMask = new global::Google.Protobuf.WellKnownTypes.FieldMask();
+        }
+        FieldMask.MergeFrom(other.FieldMask);
+      }
+      if (other.ResumeToken.Length != 0) {
+        ResumeToken = other.ResumeToken;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -3267,6 +3428,17 @@ namespace Ondewo.Nlu {
           }
           case 72: {
             AfterSeq = input.ReadInt64();
+            break;
+          }
+          case 82: {
+            if (fieldMask_ == null) {
+              FieldMask = new global::Google.Protobuf.WellKnownTypes.FieldMask();
+            }
+            input.ReadMessage(FieldMask);
+            break;
+          }
+          case 90: {
+            ResumeToken = input.ReadString();
             break;
           }
         }
@@ -3330,6 +3502,17 @@ namespace Ondewo.Nlu {
             AfterSeq = input.ReadInt64();
             break;
           }
+          case 82: {
+            if (fieldMask_ == null) {
+              FieldMask = new global::Google.Protobuf.WellKnownTypes.FieldMask();
+            }
+            input.ReadMessage(FieldMask);
+            break;
+          }
+          case 90: {
+            ResumeToken = input.ReadString();
+            break;
+          }
         }
       }
     }
@@ -3380,6 +3563,8 @@ namespace Ondewo.Nlu {
       minAvailableSeq_ = other.minAvailableSeq_;
       maxAvailableSeq_ = other.maxAvailableSeq_;
       hasMoreOlder_ = other.hasMoreOlder_;
+      nextResumeToken_ = other.nextResumeToken_;
+      hasMoreNewer_ = other.hasMoreNewer_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -3465,6 +3650,37 @@ namespace Ondewo.Nlu {
       }
     }
 
+    /// <summary>Field number for the "next_resume_token" field.</summary>
+    public const int NextResumeTokenFieldNumber = 6;
+    private string nextResumeToken_ = "";
+    /// <summary>
+    /// Cursor to fetch the next window, or to start a &lt;code>StreamRemoteOperationContainerLogs&lt;/code> (or a
+    /// &lt;code>Logs.StreamLogs&lt;/code>) that continues exactly where this window ended.
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string NextResumeToken {
+      get { return nextResumeToken_; }
+      set {
+        nextResumeToken_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "has_more_newer" field.</summary>
+    public const int HasMoreNewerFieldNumber = 7;
+    private bool hasMoreNewer_;
+    /// <summary>
+    /// True when entries newer than this window exist.
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public bool HasMoreNewer {
+      get { return hasMoreNewer_; }
+      set {
+        hasMoreNewer_ = value;
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -3485,6 +3701,8 @@ namespace Ondewo.Nlu {
       if (MinAvailableSeq != other.MinAvailableSeq) return false;
       if (MaxAvailableSeq != other.MaxAvailableSeq) return false;
       if (HasMoreOlder != other.HasMoreOlder) return false;
+      if (NextResumeToken != other.NextResumeToken) return false;
+      if (HasMoreNewer != other.HasMoreNewer) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -3497,6 +3715,8 @@ namespace Ondewo.Nlu {
       if (MinAvailableSeq != 0L) hash ^= MinAvailableSeq.GetHashCode();
       if (MaxAvailableSeq != 0L) hash ^= MaxAvailableSeq.GetHashCode();
       if (HasMoreOlder != false) hash ^= HasMoreOlder.GetHashCode();
+      if (NextResumeToken.Length != 0) hash ^= NextResumeToken.GetHashCode();
+      if (HasMoreNewer != false) hash ^= HasMoreNewer.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -3532,6 +3752,14 @@ namespace Ondewo.Nlu {
         output.WriteRawTag(40);
         output.WriteBool(HasMoreOlder);
       }
+      if (NextResumeToken.Length != 0) {
+        output.WriteRawTag(50);
+        output.WriteString(NextResumeToken);
+      }
+      if (HasMoreNewer != false) {
+        output.WriteRawTag(56);
+        output.WriteBool(HasMoreNewer);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -3559,6 +3787,14 @@ namespace Ondewo.Nlu {
         output.WriteRawTag(40);
         output.WriteBool(HasMoreOlder);
       }
+      if (NextResumeToken.Length != 0) {
+        output.WriteRawTag(50);
+        output.WriteString(NextResumeToken);
+      }
+      if (HasMoreNewer != false) {
+        output.WriteRawTag(56);
+        output.WriteBool(HasMoreNewer);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -3580,6 +3816,12 @@ namespace Ondewo.Nlu {
         size += 1 + pb::CodedOutputStream.ComputeInt64Size(MaxAvailableSeq);
       }
       if (HasMoreOlder != false) {
+        size += 1 + 1;
+      }
+      if (NextResumeToken.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(NextResumeToken);
+      }
+      if (HasMoreNewer != false) {
         size += 1 + 1;
       }
       if (_unknownFields != null) {
@@ -3606,6 +3848,12 @@ namespace Ondewo.Nlu {
       }
       if (other.HasMoreOlder != false) {
         HasMoreOlder = other.HasMoreOlder;
+      }
+      if (other.NextResumeToken.Length != 0) {
+        NextResumeToken = other.NextResumeToken;
+      }
+      if (other.HasMoreNewer != false) {
+        HasMoreNewer = other.HasMoreNewer;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -3646,6 +3894,14 @@ namespace Ondewo.Nlu {
             HasMoreOlder = input.ReadBool();
             break;
           }
+          case 50: {
+            NextResumeToken = input.ReadString();
+            break;
+          }
+          case 56: {
+            HasMoreNewer = input.ReadBool();
+            break;
+          }
         }
       }
     #endif
@@ -3683,6 +3939,14 @@ namespace Ondewo.Nlu {
           }
           case 40: {
             HasMoreOlder = input.ReadBool();
+            break;
+          }
+          case 50: {
+            NextResumeToken = input.ReadString();
+            break;
+          }
+          case 56: {
+            HasMoreNewer = input.ReadBool();
             break;
           }
         }
@@ -3736,6 +4000,7 @@ namespace Ondewo.Nlu {
       containerId_ = other.containerId_;
       containerName_ = other.containerName_;
       seq_ = other.seq_;
+      logStream_ = other.logStream_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -3826,9 +4091,11 @@ namespace Ondewo.Nlu {
     public const int SeqFieldNumber = 6;
     private long seq_;
     /// <summary>
-    /// The monotonically-increasing sequence number of this line within its container&amp;apos;s captured log
-    /// (assigned by the server-side capture). Used as the cursor for infinite-scroll paging. &lt;code>0&lt;/code>
-    /// when the line was produced by a legacy path that did not assign a sequence.
+    /// Ordering cursor of this line, assigned by the database. Monotonically increasing WITHIN ONE CONTAINER but
+    /// NOT contiguous: values come from a sequence shared by every log stream and are removed by retention. Never
+    /// compute the next cursor as &lt;code>seq + 1&lt;/code>; pass it back as &lt;code>after_seq&lt;/code> /
+    /// &lt;code>before_seq&lt;/code> (strictly greater / smaller) or use &lt;code>resume_token&lt;/code>. &lt;code>0&lt;/code> when
+    /// the line was produced by a legacy path that did not assign a sequence.
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -3836,6 +4103,22 @@ namespace Ondewo.Nlu {
       get { return seq_; }
       set {
         seq_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "log_stream" field.</summary>
+    public const int LogStreamFieldNumber = 7;
+    private string logStream_ = "";
+    /// <summary>
+    /// Resource name of the log stream this line belongs to (see
+    /// &lt;a href="index.html#ondewo.nlu.CaiLogEntry">CaiLogEntry.log_stream&lt;/a>).
+    /// </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string LogStream {
+      get { return logStream_; }
+      set {
+        logStream_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
       }
     }
 
@@ -3860,6 +4143,7 @@ namespace Ondewo.Nlu {
       if (ContainerId != other.ContainerId) return false;
       if (ContainerName != other.ContainerName) return false;
       if (Seq != other.Seq) return false;
+      if (LogStream != other.LogStream) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -3873,6 +4157,7 @@ namespace Ondewo.Nlu {
       if (ContainerId.Length != 0) hash ^= ContainerId.GetHashCode();
       if (ContainerName.Length != 0) hash ^= ContainerName.GetHashCode();
       if (Seq != 0L) hash ^= Seq.GetHashCode();
+      if (LogStream.Length != 0) hash ^= LogStream.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -3915,6 +4200,10 @@ namespace Ondewo.Nlu {
         output.WriteRawTag(48);
         output.WriteInt64(Seq);
       }
+      if (LogStream.Length != 0) {
+        output.WriteRawTag(58);
+        output.WriteString(LogStream);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -3949,6 +4238,10 @@ namespace Ondewo.Nlu {
         output.WriteRawTag(48);
         output.WriteInt64(Seq);
       }
+      if (LogStream.Length != 0) {
+        output.WriteRawTag(58);
+        output.WriteString(LogStream);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -3976,6 +4269,9 @@ namespace Ondewo.Nlu {
       }
       if (Seq != 0L) {
         size += 1 + pb::CodedOutputStream.ComputeInt64Size(Seq);
+      }
+      if (LogStream.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(LogStream);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -4009,6 +4305,9 @@ namespace Ondewo.Nlu {
       }
       if (other.Seq != 0L) {
         Seq = other.Seq;
+      }
+      if (other.LogStream.Length != 0) {
+        LogStream = other.LogStream;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -4056,6 +4355,10 @@ namespace Ondewo.Nlu {
             Seq = input.ReadInt64();
             break;
           }
+          case 58: {
+            LogStream = input.ReadString();
+            break;
+          }
         }
       }
     #endif
@@ -4100,6 +4403,10 @@ namespace Ondewo.Nlu {
           }
           case 48: {
             Seq = input.ReadInt64();
+            break;
+          }
+          case 58: {
+            LogStream = input.ReadString();
             break;
           }
         }
