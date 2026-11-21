@@ -6,9 +6,11 @@ using System.Net.Security;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
+using Grpc.Core;
 using Grpc.Net.Client;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Ondewo.Nlu.Client.Auth;
 
 namespace Ondewo.Nlu.Client.Connection
 {
@@ -76,11 +78,18 @@ namespace Ondewo.Nlu.Client.Connection
                     MaxReconnectBackoff = MaxReconnectBackoff,
                 };
                 configure?.Invoke(options);
+                ILogger logger = options.LoggerFactory?.CreateLogger(typeof(OndewoChannelFactory).FullName!)
+                                 ?? NullLogger.Instance;
+                if (config.KeycloakConfigured && options.Credentials == null)
+                {
+                    // One login per credential set, shared by every channel built from it.
+                    KeycloakTokenProvider provider = KeycloakTokenProviderRegistry.Shared.GetOrCreate(config, logger);
+                    options.Credentials = CreateKeycloakCredentials(config, provider);
+                    options.UnsafeUseInsecureChannelCallCredentials = !config.UseSecureChannel;
+                }
 
                 if (!config.UseSecureChannel)
                 {
-                    ILogger logger = options.LoggerFactory?.CreateLogger(typeof(OndewoChannelFactory).FullName!)
-                                     ?? NullLogger.Instance;
                     logger.LogWarning(
                         "Opening an INSECURE (plaintext) gRPC channel to {HostAndPort}: nothing on it is "
                         + "encrypted or authenticated. Use it for local development only.",
@@ -94,6 +103,24 @@ namespace Ondewo.Nlu.Client.Connection
                 handler.Dispose();
                 throw;
             }
+        }
+
+        /// <summary>
+        /// The channel credentials that attach <paramref name="provider"/>'s bearer token to every call: TLS
+        /// for a secure channel, none for a plaintext one (for which <see cref="Create"/> also sets
+        /// <see cref="GrpcChannelOptions.UnsafeUseInsecureChannelCallCredentials"/>).
+        /// </summary>
+        /// <param name="config">The connection configuration.</param>
+        /// <param name="provider">The token provider.</param>
+        /// <returns>The composite channel credentials.</returns>
+        /// <exception cref="ArgumentNullException">An argument is null.</exception>
+        public static ChannelCredentials CreateKeycloakCredentials(OndewoClientConfig config, KeycloakTokenProvider provider)
+        {
+            ArgumentNullException.ThrowIfNull(config);
+            ArgumentNullException.ThrowIfNull(provider);
+            return ChannelCredentials.Create(
+                config.UseSecureChannel ? ChannelCredentials.SecureSsl : ChannelCredentials.Insecure,
+                provider.CreateCallCredentials());
         }
 
         /// <summary>

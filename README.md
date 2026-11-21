@@ -273,6 +273,69 @@ A failed handshake is an `RpcException`; `Grpc.Net.Client` reports a certificate
 - **`ArgumentException: ... could not be loaded as a PEM certificate and its unencrypted private key`**: the key is
   encrypted, malformed, or belongs to another certificate.
 
+## Keycloak authentication and offline tokens
+
+An ONDEWO server behind Keycloak authenticates every call through an `authorization: Bearer <token>` metadata entry.
+Give `OndewoClientConfig` the Keycloak fields and `OndewoChannelFactory.Create` attaches an auto-refreshed token to
+every call on the channel (namespace `Ondewo.Nlu.Client.Auth`, part of the **`net10.0`** build like the channel
+factory):
+
+```csharp
+using Grpc.Net.Client;
+using Ondewo.Nlu.Client.Connection;
+
+// Password (ROPC) start-up: one `grant_type=password` + `scope=offline_access` login.
+var config = new OndewoClientConfig(
+    host: "ondewo.example.com",
+    port: 50055,
+    keycloakUrl: "https://ondewo.example.com/auth",   // the part before /realms/<realm>
+    realm: "ondewo-ccai-platform",
+    clientId: "ondewo-nlu-cai-sdk-public",           // public client: no secret
+    username: "technical-user@example.com",
+    password: Environment.GetEnvironmentVariable("ONDEWO_PASSWORD"));
+
+// Offline-token start-up: a handed-off Keycloak OFFLINE refresh token instead of a password. The
+// provider starts with ONE `grant_type=refresh_token` exchange and never sends a password grant.
+var tokenConfig = new OndewoClientConfig(
+    host: "ondewo.example.com",
+    port: 50055,
+    keycloakUrl: "https://ondewo.example.com/auth",
+    realm: "ondewo-ccai-platform",
+    clientId: "ondewo-nlu-cai-sdk-public",
+    refreshToken: Environment.GetEnvironmentVariable("ONDEWO_OFFLINE_TOKEN"));
+
+using GrpcChannel channel = OndewoChannelFactory.Create(tokenConfig);
+var client = new SomeService.SomeServiceClient(channel);
+```
+
+What the provider (`KeycloakTokenProvider`) guarantees - the same in every ONDEWO client SDK:
+
+- `keycloakUrl`, `realm` and `clientId` go together: one or two of them throws `ArgumentException`. With all three,
+  `password` or `refreshToken` is required; with both, the refresh token wins and **no password grant is ever sent,
+  not even as a fallback**. Without the three nothing changes: no token, no `authorization` entry.
+- The initial login (or offline-token exchange) runs when the channel is created; its failure is thrown there as
+  `KeycloakAuthenticationException` (the cause is its `InnerException`). Every channel built from the same
+  credentials shares ONE provider and ONE login (`KeycloakTokenProviderRegistry.Shared`).
+- The token is refreshed by a background loop 30 s before it expires and, as a fallback, on every call. A failed
+  refresh never stops the loop: it is logged once as a warning and retried with full-jitter exponential backoff
+  (5 s doubling to 300 s), shared by every call, so an outage costs one token request per backoff step instead of
+  one per gRPC call. While the current token is still valid it keeps being served; once it has expired a call fails
+  with `KeycloakAuthenticationException`. A rotated refresh token is adopted.
+- `tokenExpirationInS` stops the refresh that many seconds after the initial acquisition (on both start-ups);
+  `verifySsl: false` disables TLS verification of the token-endpoint call only (a self-signed local proxy).
+- No log line, exception message or `ToString()` contains a credential: `OndewoClientConfig.ToString()` prints
+  `password` and `refreshToken` as `***REDACTED***` (empty when they are empty). Warnings go to the
+  `ILoggerFactory` you set on `GrpcChannelOptions.LoggerFactory` in the `configure` callback.
+- Setting `options.Credentials` yourself in that callback replaces the Keycloak credentials (and skips the login).
+
+Without the channel factory, use the provider directly and dispose it when you are done:
+
+```csharp
+using var provider = KeycloakTokenProviderRegistry.Shared.GetOrCreate(config);
+var callCredentials = provider.CreateCallCredentials();   // or provider.CreateInterceptor()
+var reply = client.SomeRpc(request, provider.CreateBearerMetadata());
+```
+
 ## Repository structure
 
 ```
@@ -280,7 +343,7 @@ A failed handshake is an `RpcException`; `Grpc.Net.Client` reports a certificate
 ├── api                                      <----- generated stubs, nested by C# namespace
 │   └── Ondewo
 │       └── ...
-├── auth                                     <----- hand-written: bearer-token helpers
+├── auth                                     <----- hand-written: bearer-token helpers, Keycloak token provider
 ├── connection                               <----- hand-written: TLS / mutual-TLS channel factory (net10.0)
 ├── tests                                    <----- xunit suite over the committed stubs
 ├── artifacts                                <----- compiled assembly, symbols, XML docs (not tracked)
