@@ -65,6 +65,26 @@ namespace Ondewo.Nlu.Client.Tests
         }
 
         [Theory]
+        [InlineData(1)]
+        [InlineData(4)]
+        [InlineData(19)]
+        public void T04_ANaNJitterCountsAsZeroNotANaNDelay(int failures)
+        {
+            double delay = KeycloakTokenProvider.BackoffDelaySeconds(failures, () => double.NaN);
+
+            Assert.False(double.IsNaN(delay));
+            Assert.Equal(5.0, delay);
+        }
+
+        [Theory]
+        [InlineData(double.PositiveInfinity, 40.0)]
+        [InlineData(double.NegativeInfinity, 5.0)]
+        public void T04_AnInfiniteJitterIsClampedToTheBounds(double fraction, double expected)
+        {
+            Assert.Equal(expected, KeycloakTokenProvider.BackoffDelaySeconds(4, () => fraction));
+        }
+
+        [Theory]
         [InlineData(0)]
         [InlineData(-3)]
         public void T05_NoFailuresCountsAsOne(int failures)

@@ -414,7 +414,7 @@ namespace Ondewo.Nlu.Client.Auth
         /// from retrying in lockstep for the whole outage.
         /// </summary>
         /// <param name="consecutiveFailures">Failed refreshes so far; below 1 counts as 1.</param>
-        /// <param name="randomFn">The jitter fraction; a value outside [0, 1] is clamped.</param>
+        /// <param name="randomFn">The jitter fraction; a value outside [0, 1] is clamped and NaN counts as 0.</param>
         /// <returns>Seconds to wait.</returns>
         public static double BackoffDelaySeconds(long consecutiveFailures, Func<double> randomFn)
         {
@@ -426,7 +426,10 @@ namespace Ondewo.Nlu.Client.Auth
             ArgumentNullException.ThrowIfNull(randomFn);
             long exponent = Math.Min(Math.Max(consecutiveFailures, 1) - 1, timings.MaxRetryExponent);
             double ceiling = Math.Min(timings.RetryBaseDelayS * Math.Pow(2, exponent), timings.RetryMaxDelayS);
-            double fraction = Math.Clamp(randomFn(), 0.0, 1.0);
+            // Math.Clamp passes NaN through, which would turn the whole delay into NaN; a NaN jitter
+            // counts as 0 (the base delay), as in the java, rust, cpp, php and js SDKs.
+            double raw = randomFn();
+            double fraction = double.IsNaN(raw) ? 0.0 : Math.Clamp(raw, 0.0, 1.0);
             return timings.RetryBaseDelayS + (fraction * (ceiling - timings.RetryBaseDelayS));
         }
 
