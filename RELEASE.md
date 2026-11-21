@@ -2,6 +2,22 @@
 
 *****************
 
+## Release ONDEWO NLU Csharp Client 7.6.1
+
+### Bug Fixes
+
+* [[OND236-120]](https://ondewo.atlassian.net/browse/OND236-120) Keycloak token refresh: a failed refresh no longer ends the background refresher for the life of the process. A network error, a timeout, a non-2xx status, a body that is not a JSON object, a missing `access_token` and a non-numeric `expires_in` are all reported as the typed Keycloak authentication error with the underlying error attached, and are retried with ONE shared full-jitter backoff (5 s doubling up to 300 s) that the per-call refresh honours as well. During a Keycloak outage only one token request is in flight instead of one per RPC, and a success resets the backoff.
+* [[OND236-120]](https://ondewo.atlassian.net/browse/OND236-120) A token that is still valid keeps being served when its refresh fails inside the 30 s expiry leeway; only an EXPIRED token raises. A malformed token response changes no provider state, and a login response without a `refresh_token` is accepted (the previous one is kept).
+
+### Improvements
+
+* [[OND236-120]](https://ondewo.atlassian.net/browse/OND236-120) Offline-token start-up: the client configuration takes `RefreshToken` (a handed-off Keycloak OFFLINE refresh token, appended LAST to every positional surface so existing callers are not rebound). With it the client starts with a `grant_type=refresh_token` exchange and never sends a password grant; a refused token is never answered with a password login. A Keycloak configuration needs a password or a refresh token.
+* [[OND236-120]](https://ondewo.atlassian.net/browse/OND236-120) The token-endpoint HTTP timeout is 10 s, quoted Keycloak error bodies are cut at 500 characters, no credential appears in any log line or error message, and providers are shared per credential set through a hashed registry key. The `token_expiration_in_s` window is armed on both start-up paths.
+* [[OND236-120]](https://ondewo.atlassian.net/browse/OND236-120) Behaviour aligned with ondewo-nlu-client-python and pinned by the shared cross-language Keycloak test catalogue ported to this SDK.
+* Tracking API Version [7.6.0](https://github.com/ondewo/ondewo-nlu-api/releases/tag/7.6.0) ( [Documentation](https://ondewo.github.io/ondewo-nlu-api/) )
+
+*****************
+
 ## Release ONDEWO NLU Csharp Client 7.6.0
 
 ### Improvements
