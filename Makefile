@@ -52,11 +52,11 @@ export
 
 # MUST BE THE SAME AS THE API in Major and Minor Version Number
 # example: API 1.2.0 --> Client 1.2.X
-ONDEWO_NLU_VERSION=7.4.0
+ONDEWO_NLU_VERSION=7.5.0
 
 # Submodule pins. Both are checked out by `make checkout_defined_submodule_versions`, so the
 # generated code is always reproducible from this file alone.
-ONDEWO_NLU_API_GIT_BRANCH=tags/7.4.0
+ONDEWO_NLU_API_GIT_BRANCH=tags/7.5.0
 ONDEWO_PROTO_COMPILER_GIT_BRANCH=tags/5.15.7
 
 # Both credentials come from the ondewo-devops-accounts repository and nowhere else:
@@ -494,7 +494,7 @@ check_release_notes: ## Assert RELEASE.md carries an entry for ONDEWO_NLU_VERSIO
 	echo "$(GREEN)[SUCCESS]$(NC) RELEASE.md has release notes for ${ONDEWO_NLU_VERSION}"
 
 build_gh_release: check_release_notes ## Generate Github Release with CLI
-	gh release create --repo $(GH_REPO) "$(ONDEWO_NLU_VERSION)" -n "$(CURRENT_RELEASE_NOTES)" -t "Release ${ONDEWO_NLU_VERSION}"
+	gh release create --latest=false --repo $(GH_REPO) "$(ONDEWO_NLU_VERSION)" -n "$(CURRENT_RELEASE_NOTES)" -t "Release ${ONDEWO_NLU_VERSION}"
 
 push_to_gh: login_to_gh build_gh_release ## Logs into GitHub CLI and releases
 	@echo 'Released to Github'
